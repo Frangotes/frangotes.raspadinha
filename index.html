@@ -4,113 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raspadinha Frangote's</title>
-
   <style>
-    body{
-      margin:0;
-      background:#111;
-      color:#fff;
-      font-family:Arial, sans-serif;
-      display:flex;
-      justify-content:center;
-      padding:22px;
-    }
+    body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;padding:22px}
     .wrap{width:min(460px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
     .logo img{max-width:180px;height:auto;display:block}
     h2{margin:0;text-align:center}
-
-    .card{
-      width:100%;
-      background:#1b1b1b;
-      border:1px solid #2b2b2b;
-      border-radius:16px;
-      padding:14px;
-      box-sizing:border-box;
-    }
-    .row{display:flex;gap:10px}
-
-    input{
-      flex:1;
-      padding:12px;
-      border-radius:12px;
-      border:1px solid #333;
-      background:#0f0f0f;
-      color:#fff;
-      outline:none;
-      text-transform:uppercase;
-      box-sizing:border-box;
-    }
-    button{
-      padding:12px 14px;
-      border-radius:12px;
-      border:0;
-      background:#ffcc00;
-      font-weight:800;
-      cursor:pointer;
-    }
-    button:disabled{opacity:.55;cursor:not-allowed}
-
+    .card{width:100%;background:#1b1b1b;border:1px solid #2b2b2b;border-radius:16px;padding:14px;box-sizing:border-box}
     .msg{margin-top:10px;font-size:14px;color:#ddd}
     .msg.err{color:#ff7b7b}
 
-    #container{
-      position:relative;
-      width:100%;
-      height:220px;
-      border-radius:16px;
-      overflow:hidden;
-      display:none;
-      margin-top:12px;
-    }
-    #prize{
-      position:absolute;
-      inset:0;
-      background:linear-gradient(45deg,#ffcc00,#ff8800);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:22px;
-      font-weight:900;
-      text-align:center;
-      padding:18px;
-      box-sizing:border-box;
-    }
+    #container{position:relative;width:100%;height:220px;border-radius:16px;overflow:hidden;display:none;margin-top:12px}
+    #prize{position:absolute;inset:0;background:linear-gradient(45deg,#ffcc00,#ff8800);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-align:center;padding:18px;box-sizing:border-box}
     canvas{position:absolute;inset:0}
 
-    .meta{
-      display:none;
-      margin-top:10px;
-      font-size:12px;
-      color:#cfcfcf;
-      line-height:1.35;
-    }
+    .meta{display:none;margin-top:10px;font-size:12px;color:#cfcfcf;line-height:1.35}
     .meta b{color:#fff}
 
-    .rules{
-      margin-top:14px;
-      font-size:13px;
-      line-height:1.35;
-      color:#d7d7d7;
-    }
+    .rules{margin-top:14px;font-size:13px;line-height:1.35;color:#d7d7d7}
+
+    .form{display:none;margin-top:12px;background:#121212;border:1px solid #2b2b2b;border-radius:14px;padding:12px}
+    .form h3{margin:0 0 10px 0;font-size:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row input{flex:1;min-width:140px;padding:12px;border-radius:12px;border:1px solid #333;background:#0f0f0f;color:#fff;outline:none;box-sizing:border-box}
+    .row button{padding:12px 14px;border-radius:12px;border:0;background:#ffcc00;font-weight:800;cursor:pointer}
+    .hint{margin-top:8px;font-size:12px;color:#bbb}
   </style>
 </head>
-
 <body>
   <div class="wrap">
-
-    <div class="logo">
-      <img src="logo.png" alt="Frangote's" />
-    </div>
-
+    <div class="logo"><img src="logo.png" alt="Frangote's"></div>
     <h2>Raspe para revelar 🎁</h2>
 
     <div class="card">
-      <div class="row">
-        <input id="codeInput" placeholder="Digite o código do cupom" />
-        <button id="btn">Liberar</button>
-      </div>
-
-      <div id="msg" class="msg"></div>
+      <div id="msg" class="msg">Carregando...</div>
 
       <div id="container">
         <div id="prize"></div>
@@ -118,6 +44,19 @@
       </div>
 
       <div class="meta" id="meta"></div>
+
+      <div class="form" id="form">
+        <h3>Para controle interno (preencha antes de finalizar):</h3>
+        <div class="row">
+          <input id="firstName" placeholder="Nome" />
+          <input id="lastName" placeholder="Sobrenome" />
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <input id="whats" placeholder="WhatsApp (DDD + número)" />
+          <button id="saveBtn">Enviar</button>
+        </div>
+        <div class="hint" id="formHint"></div>
+      </div>
 
       <div class="rules">
         <b>Regras:</b><br>
@@ -127,150 +66,185 @@
         • 1 uso por código. Brinde válido somente com apresentação desta tela (comprovante) e validação.
       </div>
     </div>
-
   </div>
 
-  <script>
-    // ✅ URL OFICIAL DO SEU BACKEND (Apps Script)
-    const API_URL = "https://script.google.com/macros/s/AKfycbzxCB91SwTdJveBn9zMTM7Gl3CFX27sq_HG4HT1YFyeJAAEnQ6bUPO1kYTaDsMbPpK9/exec";
+<script>
+  // ✅ URL oficial do seu backend
+  const API_URL = "https://script.google.com/macros/s/AKfycbzxCB91SwTdJveBn9zMTM7Gl3CFX27sq_HG4HT1YFyeJAAEnQ6bUPO1kYTaDsMbPpK9/exec";
 
-    const input = document.getElementById("codeInput");
-    const btn = document.getElementById("btn");
-    const msg = document.getElementById("msg");
-    const container = document.getElementById("container");
-    const prizeBox = document.getElementById("prize");
-    const meta = document.getElementById("meta");
-    const canvas = document.getElementById("scratch");
-    const ctx = canvas.getContext("2d");
+  const msg = document.getElementById("msg");
+  const container = document.getElementById("container");
+  const prizeBox = document.getElementById("prize");
+  const meta = document.getElementById("meta");
+  const canvas = document.getElementById("scratch");
+  const ctx = canvas.getContext("2d");
 
-    // Evita múltiplos cliques
-    let busy = false;
+  const form = document.getElementById("form");
+  const firstName = document.getElementById("firstName");
+  const lastName = document.getElementById("lastName");
+  const whats = document.getElementById("whats");
+  const saveBtn = document.getElementById("saveBtn");
+  const formHint = document.getElementById("formHint");
 
-    btn.addEventListener("click", () => {
-      if (busy) return;
+  let CURRENT_CODE = "";
+  let CURRENT_TOKEN = "";
 
-      const code = input.value.trim().toUpperCase();
-      if (!code) {
-        showError("Digite um código.");
-        return;
-      }
+  function showError(t){ msg.textContent=t; msg.className="msg err"; }
+  function showInfo(t){ msg.textContent=t; msg.className="msg"; }
 
-      busy = true;
-      btn.disabled = true;
+  function getCodeFromUrl(){
+    const p = new URLSearchParams(window.location.search);
+    return (p.get("code") || "").trim().toUpperCase();
+  }
 
-      showInfo("Validando...");
-      container.style.display = "none";
-      meta.style.display = "none";
+  function jsonp(url, cb){
+    const callbackName = "cb_" + Date.now() + "_" + Math.floor(Math.random()*99999);
+    window[callbackName] = function(data){
+      try{ delete window[callbackName]; }catch(e){}
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+      cb(data);
+    };
+    const script = document.createElement("script");
+    script.onerror = function(){
+      try{ delete window[callbackName]; }catch(e){}
+      cb({ok:false, error:"Erro de conexão. Tente novamente."});
+    };
+    script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + encodeURIComponent(callbackName);
+    document.body.appendChild(script);
+  }
 
-      // JSONP callback único
-      const callbackName = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 99999);
+  function startScratch(){
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
 
-      window[callbackName] = function (data) {
-        try {
-          delete window[callbackName];
-        } catch (e) {}
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "#9a9a9a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // remove script
-        if (script && script.parentNode) script.parentNode.removeChild(script);
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.font = "bold 22px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("RASPE AQUI", canvas.width/2, canvas.height/2);
 
-        busy = false;
-        btn.disabled = false;
+    const scratchAt = (clientX, clientY) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      ctx.globalCompositeOperation="destination-out";
+      ctx.beginPath();
+      ctx.arc(x,y,22,0,Math.PI*2);
+      ctx.fill();
+    };
 
-        if (!data || !data.ok) {
-          showError((data && data.error) ? data.error : "Erro de conexão ao validar. Tente novamente.");
+    canvas.onmousemove = (e) => { if (e.buttons!==1) return; scratchAt(e.clientX,e.clientY); };
+    canvas.ontouchstart = (e) => { e.preventDefault(); const t=e.touches[0]; scratchAt(t.clientX,t.clientY); };
+    canvas.ontouchmove  = (e) => { e.preventDefault(); const t=e.touches[0]; scratchAt(t.clientX,t.clientY); };
+  }
+
+  function redeem(code){
+    showInfo("Validando sua raspadinha...");
+    container.style.display="none";
+    meta.style.display="none";
+    form.style.display="none";
+    formHint.textContent="";
+
+    const url = API_URL + "?action=redeem&code=" + encodeURIComponent(code);
+    jsonp(url, (data) => {
+      if(!data || !data.ok){
+        // se já usado, ainda mostramos para comprovação (opcional)
+        if (data && data.already_used) {
+          showError("Este código já foi usado.");
+          if (data.prize && data.token) {
+            prizeBox.textContent = data.prize;
+            CURRENT_CODE = data.code || code;
+            CURRENT_TOKEN = data.token || "";
+            meta.innerHTML = `<b>Código:</b> ${escapeHtml(CURRENT_CODE)}<br><b>Token:</b> ${escapeHtml(CURRENT_TOKEN)}<br><b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}`;
+            meta.style.display="block";
+          }
           return;
         }
 
-        showInfo("Código validado! Agora raspe 😊");
+        showError((data && data.error) ? data.error : "Falha ao validar.");
+        return;
+      }
 
-        prizeBox.textContent = data.prize || "Brinde";
-        meta.innerHTML = `
-          <b>Código:</b> ${escapeHtml(data.code)}<br>
-          <b>Token:</b> ${escapeHtml(data.token)}<br>
-          <b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}
-        `;
-        meta.style.display = "block";
+      // sucesso
+      CURRENT_CODE = data.code;
+      CURRENT_TOKEN = data.token;
 
-        startScratch();
-        container.style.display = "block";
-      };
+      showInfo("Prêmio liberado! Raspe para revelar 🎁");
+      prizeBox.textContent = data.prize || "Brinde";
 
-      const script = document.createElement("script");
-      script.onerror = function(){
-        try { delete window[callbackName]; } catch(e){}
-        busy = false;
-        btn.disabled = false;
-        showError("Erro de conexão ao validar. Tente novamente.");
-      };
-      script.src = API_URL + "?code=" + encodeURIComponent(code) + "&callback=" + encodeURIComponent(callbackName);
-      document.body.appendChild(script);
+      meta.innerHTML = `<b>Código:</b> ${escapeHtml(data.code)}<br><b>Token:</b> ${escapeHtml(data.token)}<br><b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}`;
+      meta.style.display="block";
+
+      container.style.display="block";
+      startScratch();
+
+      // formulário de controle interno
+      form.style.display="block";
+      formHint.textContent = "Preencha e clique em Enviar. (Esses dados vão para a planilha.)";
     });
+  }
 
-    function startScratch() {
-      // Ajusta canvas ao tamanho do container
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight;
+  saveBtn.addEventListener("click", () => {
+    const fn = (firstName.value || "").trim();
+    const ln = (lastName.value || "").trim();
+    const wa = (whats.value || "").trim();
 
-      // Capa cinza
-      ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "#9a9a9a";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Texto opcional
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
-      ctx.font = "bold 22px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("RASPE AQUI", canvas.width / 2, canvas.height / 2);
-
-      // Raspagem
-      const scratchAt = (clientX, clientY) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.beginPath();
-        ctx.arc(x, y, 22, 0, Math.PI * 2);
-        ctx.fill();
-      };
-
-      // Mouse
-      canvas.onmousemove = (e) => {
-        if (e.buttons !== 1) return;
-        scratchAt(e.clientX, e.clientY);
-      };
-
-      // Touch (celular)
-      canvas.ontouchmove = (e) => {
-        e.preventDefault();
-        const t = e.touches[0];
-        scratchAt(t.clientX, t.clientY);
-      };
-      canvas.ontouchstart = (e) => {
-        e.preventDefault();
-        const t = e.touches[0];
-        scratchAt(t.clientX, t.clientY);
-      };
+    if(!CURRENT_CODE || !CURRENT_TOKEN){
+      formHint.textContent = "Valide a raspadinha primeiro.";
+      return;
+    }
+    if(!fn || !ln || !wa){
+      formHint.textContent = "Preencha Nome, Sobrenome e WhatsApp.";
+      return;
     }
 
-    function showError(text) {
-      msg.textContent = text;
-      msg.className = "msg err";
-    }
+    saveBtn.disabled = true;
+    formHint.textContent = "Enviando...";
 
-    function showInfo(text) {
-      msg.textContent = text;
-      msg.className = "msg";
-    }
+    const url = API_URL
+      + "?action=claim"
+      + "&code=" + encodeURIComponent(CURRENT_CODE)
+      + "&token=" + encodeURIComponent(CURRENT_TOKEN)
+      + "&first_name=" + encodeURIComponent(fn)
+      + "&last_name=" + encodeURIComponent(ln)
+      + "&whatsapp=" + encodeURIComponent(wa);
 
-    function escapeHtml(str){
-      return String(str || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-  </script>
+    jsonp(url, (data) => {
+      saveBtn.disabled = false;
+      if(!data || !data.ok){
+        formHint.textContent = (data && data.error) ? data.error : "Falha ao registrar.";
+        return;
+      }
+      formHint.textContent = data.message || "Registrado!";
+      // opcional: travar campos depois de salvar
+      if (data.saved) {
+        firstName.disabled = true;
+        lastName.disabled = true;
+        whats.disabled = true;
+        saveBtn.disabled = true;
+      }
+    });
+  });
+
+  function escapeHtml(str){
+    return String(str || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // START
+  const code = getCodeFromUrl();
+  if(!code){
+    showError("Link inválido. Faltou o código na URL.");
+  } else {
+    redeem(code);
+  }
+</script>
 </body>
 </html>
