@@ -69,7 +69,11 @@
   </div>
 
 <script>
-  // ✅ URL oficial do seu backend (Apps Script)
+  /**
+   * COLE AQUI A URL /exec DO SEU WEB APP (Apps Script).
+   * Ela precisa ser do formato:
+   * https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+   */
   const API_URL = "https://script.google.com/macros/s/AKfycbzxCB91SwTdJveBn9zMTM7Gl3CFX27sq_HG4HT1YFyeJAAEnQ6bUPO1kYTaDsMbPpK9/exec";
 
   const msg = document.getElementById("msg");
@@ -142,6 +146,11 @@
   }
 
   function redeem(code){
+    if (!API_URL || API_URL.includes("COLE_AQUI")) {
+      showError("Configuração pendente: falta colar a URL /exec do Apps Script no index.html.");
+      return;
+    }
+
     showInfo("Validando sua raspadinha...");
     container.style.display="none";
     meta.style.display="none";
@@ -229,7 +238,7 @@
       .replaceAll("'","&#039;");
   }
 
-  // ✅ INÍCIO AUTOMÁTICO
+  // INÍCIO AUTOMÁTICO
   const code = getCodeFromUrl();
   if(!code){
     showError("Link inválido. Faltou o código na URL.");
