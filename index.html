@@ -21,7 +21,6 @@
     .meta b{color:#fff}
 
     .rules{margin-top:14px;font-size:13px;line-height:1.35;color:#d7d7d7}
-
     .form{display:none;margin-top:12px;background:#121212;border:1px solid #2b2b2b;border-radius:14px;padding:12px}
     .form h3{margin:0 0 10px 0;font-size:14px}
     .row{display:flex;gap:10px;flex-wrap:wrap}
@@ -30,6 +29,7 @@
     .hint{margin-top:8px;font-size:12px;color:#bbb}
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="logo"><img src="logo.png" alt="Frangote's"></div>
@@ -69,7 +69,7 @@
   </div>
 
 <script>
-  // ✅ URL oficial do seu backend
+  // ✅ URL oficial do seu backend (Apps Script)
   const API_URL = "https://script.google.com/macros/s/AKfycbzxCB91SwTdJveBn9zMTM7Gl3CFX27sq_HG4HT1YFyeJAAEnQ6bUPO1kYTaDsMbPpK9/exec";
 
   const msg = document.getElementById("msg");
@@ -151,39 +151,31 @@
     const url = API_URL + "?action=redeem&code=" + encodeURIComponent(code);
     jsonp(url, (data) => {
       if(!data || !data.ok){
-        // se já usado, ainda mostramos para comprovação (opcional)
         if (data && data.already_used) {
           showError("Este código já foi usado.");
-          if (data.prize && data.token) {
-            prizeBox.textContent = data.prize;
-            CURRENT_CODE = data.code || code;
-            CURRENT_TOKEN = data.token || "";
-            meta.innerHTML = `<b>Código:</b> ${escapeHtml(CURRENT_CODE)}<br><b>Token:</b> ${escapeHtml(CURRENT_TOKEN)}<br><b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}`;
-            meta.style.display="block";
-          }
           return;
         }
-
         showError((data && data.error) ? data.error : "Falha ao validar.");
         return;
       }
 
-      // sucesso
       CURRENT_CODE = data.code;
       CURRENT_TOKEN = data.token;
 
       showInfo("Prêmio liberado! Raspe para revelar 🎁");
       prizeBox.textContent = data.prize || "Brinde";
 
-      meta.innerHTML = `<b>Código:</b> ${escapeHtml(data.code)}<br><b>Token:</b> ${escapeHtml(data.token)}<br><b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}`;
+      meta.innerHTML =
+        `<b>Código:</b> ${escapeHtml(data.code)}<br>` +
+        `<b>Token:</b> ${escapeHtml(data.token)}<br>` +
+        `<b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}`;
       meta.style.display="block";
 
       container.style.display="block";
       startScratch();
 
-      // formulário de controle interno
       form.style.display="block";
-      formHint.textContent = "Preencha e clique em Enviar. (Esses dados vão para a planilha.)";
+      formHint.textContent = "Preencha e clique em Enviar. (Vai para a planilha.)";
     });
   }
 
@@ -219,7 +211,6 @@
         return;
       }
       formHint.textContent = data.message || "Registrado!";
-      // opcional: travar campos depois de salvar
       if (data.saved) {
         firstName.disabled = true;
         lastName.disabled = true;
@@ -238,7 +229,7 @@
       .replaceAll("'","&#039;");
   }
 
-  // START
+  // ✅ INÍCIO AUTOMÁTICO
   const code = getCodeFromUrl();
   if(!code){
     showError("Link inválido. Faltou o código na URL.");
