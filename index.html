@@ -1,191 +1,174 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Raspadinha Frangote's</title>
+
 <style>
-  body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;padding:22px}
-  .wrap{width:min(520px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
-  .logo img{max-width:220px;height:auto;display:block}
-  h2{margin:0;text-align:center}
-  .card{width:100%;background:#1b1b1b;border:1px solid #2b2b2b;border-radius:16px;padding:14px;box-sizing:border-box}
-  .row{display:flex;gap:10px;align-items:center}
-  input{flex:1;padding:12px;border-radius:12px;border:1px solid #333;background:#0f0f0f;color:#fff;outline:none;text-transform:uppercase}
-  button{padding:12px 14px;border-radius:12px;border:0;cursor:pointer;background:#ffcc00;font-weight:800}
-  button:disabled{opacity:.55;cursor:not-allowed}
-  .msg{margin-top:10px;font-size:14px;color:#ddd}
-  .msg.err{color:#ff7b7b}
-  #container{position:relative;width:100%;height:220px;border-radius:16px;overflow:hidden;display:none;margin-top:12px}
-  #prize{position:absolute;inset:0;background:linear-gradient(45deg,#ffcc00,#ff8800);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-align:center;padding:18px;box-sizing:border-box;color:#111}
-  canvas{position:absolute;inset:0}
-  .meta{display:none;margin-top:10px;font-size:12px;color:#cfcfcf;line-height:1.35}
-  .meta b{color:#fff}
-  .rules{margin-top:14px;font-size:13px;line-height:1.35;color:#d7d7d7}
-  .rules b{color:#fff}
+body{
+  margin:0;
+  background:#111;
+  color:#fff;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  padding:22px;
+}
+.wrap{width:min(460px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
+.logo img{max-width:180px;height:auto;display:block}
+.card{width:100%;background:#1b1b1b;border:1px solid #2b2b2b;border-radius:16px;padding:14px}
+.row{display:flex;gap:10px}
+input{
+  flex:1;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #333;
+  background:#0f0f0f;
+  color:#fff;
+  outline:none;
+  text-transform:uppercase;
+}
+button{
+  padding:12px 14px;
+  border-radius:12px;
+  border:0;
+  background:#ffcc00;
+  font-weight:800;
+  cursor:pointer;
+}
+button:disabled{opacity:.55;cursor:not-allowed}
+.msg{margin-top:10px;font-size:14px;color:#ddd}
+.msg.err{color:#ff7b7b}
+
+#container{
+  position:relative;
+  width:100%;
+  height:220px;
+  border-radius:16px;
+  overflow:hidden;
+  display:none;
+  margin-top:12px;
+}
+#prize{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(45deg,#ffcc00,#ff8800);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:900;
+  text-align:center;
+  padding:18px;
+}
+canvas{position:absolute;inset:0}
+.meta{margin-top:10px;font-size:12px;color:#cfcfcf;line-height:1.35}
+.meta b{color:#fff}
+.rules{margin-top:14px;font-size:13px;line-height:1.35;color:#d7d7d7}
 </style>
 </head>
 
 <body>
-  <div class="wrap">
+<div class="wrap">
 
-    <div class="logo">
-      <img src="logo.png" alt="Frangote's" onerror="this.style.display='none';" />
-    </div>
+<div class="logo">
+<img src="logo.png">
+</div>
 
-    <h2>Raspe para revelar 🎁</h2>
+<h2>Raspe para revelar 🎁</h2>
 
-    <div class="card">
-      <div class="row">
-        <input id="code" placeholder="DIGITE O CÓDIGO DO CUPOM" maxlength="30" />
-        <button id="btn">Liberar</button>
-      </div>
+<div class="card">
+<div class="row">
+<input id="codeInput" placeholder="Digite o código do cupom">
+<button id="btn">Liberar</button>
+</div>
+<div id="msg" class="msg"></div>
 
-      <div id="msg" class="msg">Digite o código para liberar a raspadinha.</div>
+<div id="container">
+<div id="prize"></div>
+<canvas id="scratch"></canvas>
+</div>
 
-      <div id="container">
-        <div id="prize">...</div>
-        <canvas id="scratch"></canvas>
-      </div>
+<div class="meta" id="meta"></div>
 
-      <div id="meta" class="meta">
-        <div>Código: <b id="mcode"></b></div>
-        <div>Comprovante (TOKEN): <b id="mtoken"></b></div>
-        <div>Validado em: <b id="mtime"></b></div>
-        <div>Válido até: <b id="mvalid"></b></div>
-      </div>
+<div class="rules">
+<b>Regras:</b><br>
+• Para resgatar seu prêmio, você deve realizar uma compra de qualquer produto Frangote's.<br>
+• Validade: 7 dias (se cair em dia fechado, prorroga para quarta).<br>
+• Funcionamento: quarta a domingo.<br>
+• 1 uso por código. Brinde válido somente com apresentação desta tela (comprovante) e validação.
+</div>
+</div>
 
-      <div class="rules">
-        <b>Regras:</b><br>
-        • Para resgatar seu prêmio, você deve realizar uma compra de qualquer produto Frangote's.<br>
-        • Validade: 7 dias (se cair em dia fechado, prorroga para o próximo dia de funcionamento).<br>
-        • Funcionamento: quarta a domingo.<br>
-        • 1 uso por código. Brinde válido somente com apresentação desta tela (comprovante) e validação.<br>
-      </div>
-    </div>
-
-  </div>
+</div>
 
 <script>
-  // ✅ URL NOVA do seu Apps Script (Web App)
-  const API_URL = "https://script.google.com/macros/s/AKfycbzxCB91SwTdJveBn9zMTM7Gl3CFX27sq_HG4HT1YFyeJAAEnQ6bUPO1kYTaDsMbPpK9/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzPeA_4Z3lRBfcovssPNbzA0oEn2aNHffsttd74muf-qE78VfNXrwuHdUg_foWxPCx8Dg/exec";
 
-  const btn = document.getElementById("btn");
-  const input = document.getElementById("code");
-  const msg = document.getElementById("msg");
-  const container = document.getElementById("container");
-  const prizeEl = document.getElementById("prize");
-  const meta = document.getElementById("meta");
-  const mcode = document.getElementById("mcode");
-  const mtoken = document.getElementById("mtoken");
-  const mtime = document.getElementById("mtime");
-  const mvalid = document.getElementById("mvalid");
+const input = document.getElementById("codeInput");
+const btn = document.getElementById("btn");
+const msg = document.getElementById("msg");
+const container = document.getElementById("container");
+const prizeBox = document.getElementById("prize");
+const meta = document.getElementById("meta");
+const canvas = document.getElementById("scratch");
+const ctx = canvas.getContext("2d");
 
-  const canvas = document.getElementById("scratch");
-  const ctx = canvas.getContext("2d");
-  let scratchEnabled = false;
+btn.onclick = function(){
+  const code = input.value.trim().toUpperCase();
+  if(!code){ msg.textContent="Digite um código."; return; }
 
-  function setMsg(text, isErr=false){
-    msg.textContent = text;
-    msg.className = "msg" + (isErr ? " err" : "");
-  }
+  msg.textContent="Validando...";
+  container.style.display="none";
 
-  function setupCanvas(){
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
+  const callbackName = "cb_"+Date.now();
+  window[callbackName] = function(data){
+    delete window[callbackName];
+    document.body.removeChild(script);
 
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "#9a9a9a";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    ctx.fillStyle = "rgba(0,0,0,.35)";
-    ctx.font = "bold 18px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("RASPE AQUI", canvas.width/2, canvas.height/2);
-
-    ctx.globalCompositeOperation = "destination-out";
-  }
-
-  function scratch(e){
-    if(!scratchEnabled) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    ctx.beginPath();
-    ctx.arc(x,y,22,0,Math.PI*2);
-    ctx.fill();
-  }
-
-  canvas.addEventListener("mousemove", e => { if(e.buttons===1) scratch(e); });
-  canvas.addEventListener("touchmove", e => { e.preventDefault(); scratch(e); }, {passive:false});
-
-  // ✅ JSONP (resolve CORS no GitHub Pages)
-  function jsonp(url, timeoutMs=12000){
-    return new Promise((resolve, reject) => {
-      const cbName = "cb_" + Math.random().toString(36).slice(2);
-      const finalUrl = url + (url.includes("?") ? "&" : "?") + "callback=" + encodeURIComponent(cbName);
-
-      const script = document.createElement("script");
-      const timer = setTimeout(() => cleanup(new Error("timeout")), timeoutMs);
-
-      function cleanup(err){
-        clearTimeout(timer);
-        script.remove();
-        try { delete window[cbName]; } catch(e){}
-        if (err) reject(err);
-      }
-
-      window[cbName] = (payload) => {
-        cleanup();
-        resolve(payload);
-      };
-
-      script.onerror = () => cleanup(new Error("network"));
-      script.src = finalUrl;
-      document.body.appendChild(script);
-    });
-  }
-
-  async function validateCode(){
-    const code = (input.value || "").trim().toUpperCase();
-    if(!code){ setMsg("Digite o código do cupom.", true); return; }
-
-    btn.disabled = true;
-    setMsg("Validando...");
-
-    try{
-      const url = API_URL + "?code=" + encodeURIComponent(code);
-      const data = await jsonp(url);
-
-      if(!data || !data.ok){
-        setMsg((data && data.error) ? data.error : "Falha ao validar.", true);
-        container.style.display = "none";
-        meta.style.display = "none";
-        scratchEnabled = false;
-        return;
-      }
-
-      prizeEl.textContent = data.prize || "BRINDE";
-      container.style.display = "block";
-      meta.style.display = "block";
-      mcode.textContent = data.code || code;
-      mtoken.textContent = data.token || "-";
-      mtime.textContent = data.used_at ? new Date(data.used_at).toLocaleString() : "-";
-      mvalid.textContent = data.valid_until ? new Date(data.valid_until).toLocaleDateString() : "-";
-
-      setupCanvas();
-      scratchEnabled = true;
-      setMsg("Agora raspe para revelar 👆");
-
-    }catch(err){
-      setMsg("Erro de conexão ao validar. Tente novamente.", true);
-    }finally{
-      btn.disabled = false;
+    if(!data.ok){
+      msg.textContent = data.error;
+      msg.className="msg err";
+      return;
     }
-  }
 
-  btn.addEventListener("click", validateCode);
-  input.addEventListener("keydown", (e)=>{ if(e.key==="Enter") validateCode(); });
+    msg.textContent = "Código validado!";
+    msg.className="msg";
+
+    prizeBox.textContent = data.prize;
+    meta.innerHTML = `
+      <b>Código:</b> ${data.code}<br>
+      <b>Token:</b> ${data.token}<br>
+      <b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}
+    `;
+
+    startScratch();
+    container.style.display="block";
+  };
+
+  const script = document.createElement("script");
+  script.src = API_URL + "?code=" + encodeURIComponent(code) + "&callback=" + callbackName;
+  document.body.appendChild(script);
+};
+
+function startScratch(){
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  ctx.fillStyle = "#999";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  canvas.onmousemove = function(e){
+    if(e.buttons!==1) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctx.globalCompositeOperation="destination-out";
+    ctx.beginPath();
+    ctx.arc(x,y,20,0,Math.PI*2);
+    ctx.fill();
+  };
+}
 </script>
 </body>
 </html>
