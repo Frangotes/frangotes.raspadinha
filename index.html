@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Raspadinha Frangote's</title>
   <style>
     body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;padding:22px}
-    .wrap{width:min(460px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
+    .wrap{width:min(520px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
     .logo img{max-width:180px;height:auto;display:block}
     h2{margin:0;text-align:center}
     .card{width:100%;background:#1b1b1b;border:1px solid #2b2b2b;border-radius:16px;padding:14px;box-sizing:border-box}
-    .msg{margin-top:10px;font-size:14px;color:#ddd}
+    .msg{margin-top:6px;font-size:14px;color:#ddd}
     .msg.err{color:#ff7b7b}
 
-    #container{position:relative;width:100%;height:220px;border-radius:16px;overflow:hidden;display:none;margin-top:12px}
+    #container{position:relative;width:100%;height:240px;border-radius:16px;overflow:hidden;display:none;margin-top:12px}
     #prize{position:absolute;inset:0;background:linear-gradient(45deg,#ffcc00,#ff8800);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-align:center;padding:18px;box-sizing:border-box}
     canvas{position:absolute;inset:0}
 
@@ -21,15 +21,14 @@
     .meta b{color:#fff}
 
     .rules{margin-top:14px;font-size:13px;line-height:1.35;color:#d7d7d7}
+
     .form{display:none;margin-top:12px;background:#121212;border:1px solid #2b2b2b;border-radius:14px;padding:12px}
-    .form h3{margin:0 0 10px 0;font-size:14px}
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .row input{flex:1;min-width:140px;padding:12px;border-radius:12px;border:1px solid #333;background:#0f0f0f;color:#fff;outline:none;box-sizing:border-box}
     .row button{padding:12px 14px;border-radius:12px;border:0;background:#ffcc00;font-weight:800;cursor:pointer}
     .hint{margin-top:8px;font-size:12px;color:#bbb}
   </style>
 </head>
-
 <body>
   <div class="wrap">
     <div class="logo"><img src="logo.png" alt="Frangote's"></div>
@@ -46,13 +45,13 @@
       <div class="meta" id="meta"></div>
 
       <div class="form" id="form">
-        <h3>Para controle interno (preencha antes de finalizar):</h3>
+        <div style="font-weight:800;margin-bottom:8px">Para controle interno (opcional):</div>
         <div class="row">
-          <input id="firstName" placeholder="Nome" />
-          <input id="lastName" placeholder="Sobrenome" />
+          <input id="firstName" placeholder="Nome"/>
+          <input id="lastName" placeholder="Sobrenome"/>
         </div>
         <div class="row" style="margin-top:10px;">
-          <input id="whats" placeholder="WhatsApp (DDD + número)" />
+          <input id="whats" placeholder="WhatsApp (DDD + número)"/>
           <button id="saveBtn">Enviar</button>
         </div>
         <div class="hint" id="formHint"></div>
@@ -69,12 +68,8 @@
   </div>
 
 <script>
-  /**
-   * COLE AQUI A URL /exec DO SEU WEB APP (Apps Script).
-   * Ela precisa ser do formato:
-   * https://script.google.com/macros/s/XXXXXXXXXXXX/exec
-   */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzxCB91SwTdJveBn9zMTM7Gl3CFX27sq_HG4HT1YFyeJAAEnQ6bUPO1kYTaDsMbPpK9/exec";
+  // COLE AQUI a URL /exec do Apps Script (Web App)
+  const API_URL = "https://script.google.com/macros/s/AKfycbwpGKyZnLpVhqeD0EdOiJWOjZyQW2YVDkaS8ULiY2KLRmooQXByisewtWLMwioZsGHT/exec";
 
   const msg = document.getElementById("msg");
   const container = document.getElementById("container");
@@ -96,24 +91,24 @@
   function showError(t){ msg.textContent=t; msg.className="msg err"; }
   function showInfo(t){ msg.textContent=t; msg.className="msg"; }
 
-  function getCodeFromUrl(){
+  function getCode(){
     const p = new URLSearchParams(window.location.search);
     return (p.get("code") || "").trim().toUpperCase();
   }
 
   function jsonp(url, cb){
-    const callbackName = "cb_" + Date.now() + "_" + Math.floor(Math.random()*99999);
-    window[callbackName] = function(data){
-      try{ delete window[callbackName]; }catch(e){}
-      if (script && script.parentNode) script.parentNode.removeChild(script);
+    const cbName = "cb_" + Date.now() + "_" + Math.floor(Math.random()*99999);
+    window[cbName] = (data) => {
+      try{ delete window[cbName]; }catch(e){}
+      script.remove();
       cb(data);
     };
     const script = document.createElement("script");
-    script.onerror = function(){
-      try{ delete window[callbackName]; }catch(e){}
-      cb({ok:false, error:"Erro de conexão. Tente novamente."});
+    script.onerror = () => {
+      try{ delete window[cbName]; }catch(e){}
+      cb({ok:false,error:"Erro de conexão. Tente novamente."});
     };
-    script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + encodeURIComponent(callbackName);
+    script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + encodeURIComponent(cbName);
     document.body.appendChild(script);
   }
 
@@ -147,23 +142,20 @@
 
   function redeem(code){
     if (!API_URL || API_URL.includes("COLE_AQUI")) {
-      showError("Configuração pendente: falta colar a URL /exec do Apps Script no index.html.");
+      showError("Falta configurar a URL do Apps Script no index.html.");
       return;
     }
 
-    showInfo("Validando sua raspadinha...");
+    showInfo("Validando...");
     container.style.display="none";
     meta.style.display="none";
     form.style.display="none";
     formHint.textContent="";
 
     const url = API_URL + "?action=redeem&code=" + encodeURIComponent(code);
+
     jsonp(url, (data) => {
       if(!data || !data.ok){
-        if (data && data.already_used) {
-          showError("Este código já foi usado.");
-          return;
-        }
         showError((data && data.error) ? data.error : "Falha ao validar.");
         return;
       }
@@ -171,8 +163,10 @@
       CURRENT_CODE = data.code;
       CURRENT_TOKEN = data.token;
 
-      showInfo("Prêmio liberado! Raspe para revelar 🎁");
+      showInfo("Raspe para revelar 🎁");
       prizeBox.textContent = data.prize || "Brinde";
+      container.style.display="block";
+      startScratch();
 
       meta.innerHTML =
         `<b>Código:</b> ${escapeHtml(data.code)}<br>` +
@@ -180,11 +174,8 @@
         `<b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}`;
       meta.style.display="block";
 
-      container.style.display="block";
-      startScratch();
-
       form.style.display="block";
-      formHint.textContent = "Preencha e clique em Enviar. (Vai para a planilha.)";
+      formHint.textContent = "Opcional: preencha para controle interno.";
     });
   }
 
@@ -193,15 +184,10 @@
     const ln = (lastName.value || "").trim();
     const wa = (whats.value || "").trim();
 
-    if(!CURRENT_CODE || !CURRENT_TOKEN){
-      formHint.textContent = "Valide a raspadinha primeiro.";
-      return;
-    }
     if(!fn || !ln || !wa){
       formHint.textContent = "Preencha Nome, Sobrenome e WhatsApp.";
       return;
     }
-
     saveBtn.disabled = true;
     formHint.textContent = "Enviando...";
 
@@ -219,13 +205,11 @@
         formHint.textContent = (data && data.error) ? data.error : "Falha ao registrar.";
         return;
       }
-      formHint.textContent = data.message || "Registrado!";
-      if (data.saved) {
-        firstName.disabled = true;
-        lastName.disabled = true;
-        whats.disabled = true;
-        saveBtn.disabled = true;
-      }
+      formHint.textContent = "Registrado ✅";
+      firstName.disabled = true;
+      lastName.disabled = true;
+      whats.disabled = true;
+      saveBtn.disabled = true;
     });
   });
 
@@ -238,10 +222,10 @@
       .replaceAll("'","&#039;");
   }
 
-  // INÍCIO AUTOMÁTICO
-  const code = getCodeFromUrl();
+  // INIT
+  const code = getCode();
   if(!code){
-    showError("Link inválido. Faltou o código na URL.");
+    showError("Link inválido. Este link precisa conter ?code=SEU-CODIGO");
   } else {
     redeem(code);
   }
