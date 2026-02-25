@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raspadinha Frangote's</title>
+
+<style>
+body{
+  margin:0;
+  background:#111;
+  font-family:Arial, sans-serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  color:white;
+}
+
+h2{
+  margin-bottom:20px;
+}
+
+#container{
+  position:relative;
+  width:320px;
+  height:200px;
+  border-radius:15px;
+  overflow:hidden;
+}
+
+#prize{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:linear-gradient(45deg,#ffcc00,#ff8800);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:bold;
+  text-align:center;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+canvas{
+  position:absolute;
+  top:0;
+  left:0;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Raspe para revelar 🎁</h2>
+
+<div id="container">
+  <div id="prize">
+    VOCÊ GANHOU UM BRINDE!
+  </div>
+  <canvas id="scratch"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById("scratch");
+const ctx = canvas.getContext("2d");
+const container = document.getElementById("container");
+
+canvas.width = container.offsetWidth;
+canvas.height = container.offsetHeight;
+
+ctx.fillStyle = "#999";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.globalCompositeOperation = "destination-out";
+
+function scratch(e){
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+  ctx.beginPath();
+  ctx.arc(x,y,20,0,Math.PI*2);
+  ctx.fill();
+}
+
+canvas.addEventListener("mousemove", e=>{
+  if(e.buttons===1) scratch(e);
+});
+
+canvas.addEventListener("touchmove", e=>{
+  e.preventDefault();
+  scratch(e);
+});
+</script>
+
+</body>
+</html>
