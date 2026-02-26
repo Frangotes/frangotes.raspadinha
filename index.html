@@ -12,10 +12,9 @@
       --text:#f2f2f4;
       --accent:#ff3b3b;
       --ok:#2bd576;
-      --warn:#ffcc00;
       --shadow: 0 20px 60px rgba(0,0,0,.55);
       --radius: 18px;
-      --w: min(680px, 92vw);
+      --w: min(720px, 92vw);
     }
     *{box-sizing:border-box}
     body{
@@ -29,25 +28,9 @@
       justify-content:center;
       padding:24px 0;
     }
-    .wrap{
-      width:var(--w);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:16px;
-    }
-    .logo{
-      width:180px;
-      height:auto;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,.55));
-      margin-top:4px;
-    }
-    h1{
-      margin:0;
-      font-size: clamp(22px, 4vw, 30px);
-      letter-spacing:.2px;
-      text-align:center;
-    }
+    .wrap{ width:var(--w); display:flex; flex-direction:column; align-items:center; gap:16px; }
+    .logo{ width:180px; height:auto; filter: drop-shadow(0 10px 18px rgba(0,0,0,.55)); margin-top:4px; }
+    h1{ margin:0; font-size: clamp(22px, 4vw, 30px); text-align:center; }
     .card{
       width:100%;
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
@@ -56,85 +39,63 @@
       box-shadow: var(--shadow);
       padding:16px;
     }
-    .row{
-      display:flex; gap:12px; flex-wrap:wrap;
-      align-items:center; justify-content:space-between;
-    }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
     .pill{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
+      font-size:12px; padding:6px 10px; border-radius:999px;
       border:1px solid rgba(255,255,255,.16);
       background: rgba(0,0,0,.25);
       color:var(--muted);
     }
-    .pill strong{ color:var(--text); font-weight:700 }
+    .pill strong{ color:var(--text); font-weight:800 }
     .msg{
-      margin-top:10px;
-      padding:12px 12px;
-      border-radius:14px;
-      background: rgba(0,0,0,.28);
+      margin-top:10px; padding:12px;
+      border-radius:14px; background: rgba(0,0,0,.28);
       border:1px solid rgba(255,255,255,.10);
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.35;
-      white-space:pre-line;
+      color:var(--muted); font-size:14px; line-height:1.35; white-space:pre-line;
+      display:none;
     }
-    .msg.error{ border-color: rgba(255,59,59,.45); color:#ffd4d4 }
-    .msg.ok{ border-color: rgba(43,213,118,.35); color:#d7ffe8 }
+    .msg.error{ border-color: rgba(255,59,59,.45); color:#ffd4d4; display:block;}
+    .msg.ok{ border-color: rgba(43,213,118,.35); color:#d7ffe8; display:block;}
     .scratchWrap{
-      margin-top:14px;
-      width:100%;
-      border-radius: 18px;
-      overflow:hidden;
+      margin-top:14px; width:100%;
+      border-radius: 18px; overflow:hidden;
       border:1px solid rgba(255,255,255,.10);
-      background: #0f0f12;
+      background:#0f0f12;
       position:relative;
     }
     .reveal{
-      padding:16px;
-      min-height:190px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      text-align:center;
+      padding:16px; min-height:190px;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:8px; text-align:center;
     }
-    .gift{
-      font-size:38px;
-      line-height:1;
-      filter: drop-shadow(0 10px 14px rgba(0,0,0,.45));
-    }
-    .reveal h2{
-      margin:0;
-      font-size:22px;
-    }
-    .reveal p{
-      margin:0;
-      color:var(--muted);
-      font-size:14px;
-      max-width: 52ch;
+    .gift{ font-size:38px; line-height:1; filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); }
+    .reveal h2{ margin:0; font-size:22px; }
+    .reveal p{ margin:0; color:var(--muted); font-size:14px; max-width: 60ch; }
+    .reveal .prizeBox{
+      margin-top:10px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      width:100%;
+      max-width: 560px;
+      font-weight:800;
+      line-height:1.35;
     }
     canvas{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
+      position:absolute; inset:0;
+      width:100%; height:100%;
       touch-action:none;
       cursor: crosshair;
     }
     .hint{
-      position:absolute;
-      inset:auto 10px 10px 10px;
-      display:flex;
-      justify-content:center;
-      pointer-events:none;
-      opacity:.92;
+      position:absolute; inset:auto 10px 10px 10px;
+      display:flex; justify-content:center;
+      pointer-events:none; opacity:.92;
     }
     .hint span{
-      font-size:12px;
-      padding:6px 10px;
+      font-size:12px; padding:6px 10px;
       border-radius:999px;
       background: rgba(0,0,0,.55);
       border:1px solid rgba(255,255,255,.14);
@@ -146,39 +107,21 @@
       display:none;
       gap:10px;
       flex-direction:column;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:14px;
     }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .grid .full{ grid-column: 1 / -1; }
-    label{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      font-size:12px;
-      color:var(--muted);
-    }
-    input, select{
-      padding:12px 12px;
-      border-radius:14px;
+    label{ display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted); }
+    input{
+      padding:12px; border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.25);
       color: var(--text);
       outline:none;
     }
-    input:focus, select:focus{
-      border-color: rgba(255,255,255,.25);
-    }
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
-      margin-top:4px;
-    }
+    input:focus{ border-color: rgba(255,255,255,.25); }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
     button{
       padding:12px 14px;
       border-radius:14px;
@@ -186,37 +129,27 @@
       background: rgba(255,255,255,.08);
       color: var(--text);
       cursor:pointer;
-      font-weight:700;
+      font-weight:800;
     }
     button.primary{
       background: linear-gradient(180deg, rgba(255,59,59,.95), rgba(200,20,20,.95));
       border-color: rgba(255,59,59,.45);
     }
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
+    button:disabled{ opacity:.55; cursor:not-allowed; }
     .rules{
       margin-top:10px;
       color:var(--muted);
       font-size:13px;
-      line-height:1.35;
+      line-height:1.42;
+      white-space:pre-line;
     }
     .rules b{ color:var(--text); }
-    .small{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:6px;
-    }
   </style>
 </head>
 <body>
   <div class="wrap">
-
-    <!-- Troque o src abaixo pelo link do seu logo se quiser -->
     <img class="logo" alt="Frangote's" src="logo.png" onerror="this.style.display='none'"/>
-
-    <h1>Raspe para revelar 🎁</h1>
+    <h1>RASPE E GANHE 🎁</h1>
 
     <div class="card">
       <div class="row">
@@ -224,20 +157,20 @@
         <div class="pill">Código: <strong id="codePill">—</strong></div>
       </div>
 
-      <div id="msg" class="msg" style="display:none;"></div>
+      <div id="msg" class="msg"></div>
 
       <div class="scratchWrap" id="scratchWrap" style="display:none;">
         <div class="reveal" id="reveal">
           <div class="gift">🎉</div>
-          <h2 id="revealTitle">Você ganhou!</h2>
-          <p id="revealText">
-            Preencha seus dados para validarmos e registrar seu resgate.
+          <h2 id="revealTitle">Raspe para revelar</h2>
+          <p id="revealText">Use o dedo/mouse para raspar e revelar seu prêmio.</p>
+          <div class="prizeBox" id="prizeBox" style="display:none;"></div>
+          <p id="afterPrizeText" style="display:none;">
+            Preencha as informações abaixo para registrar e recuperar seu prêmio.
           </p>
-          <div class="small" id="revealExtra"></div>
         </div>
 
         <canvas id="scratch"></canvas>
-
         <div class="hint"><span>Use o dedo/mouse para raspar</span></div>
       </div>
 
@@ -255,18 +188,6 @@
             WhatsApp (somente números)
             <input id="whatsapp" inputmode="numeric" autocomplete="tel" required maxlength="20" placeholder="Ex: 86999999999" />
           </label>
-
-          <!-- Por enquanto, opcional: tamanho do pedido.
-               Na próxima sub-etapa vamos usar isso para calcular/mostrar o prêmio P/M/G corretamente. -->
-          <label class="full">
-            Tamanho do seu pedido (para calcular o brinde)
-            <select id="size">
-              <option value="">Selecione (opcional por enquanto)</option>
-              <option value="P">P (8 pedaços)</option>
-              <option value="M">M (12 pedaços)</option>
-              <option value="G">G (12 pedaços)</option>
-            </select>
-          </label>
         </div>
 
         <div class="actions">
@@ -275,23 +196,18 @@
         </div>
       </form>
 
-      <div class="rules">
-        <b>Regras:</b><br/>
-        • 1 uso por código.<br/>
-        • Para resgatar o brinde, é necessário realizar um pedido.<br/>
-        • O brinde varia conforme o pedido e a frequência da semana.<br/>
-      </div>
+      <div class="rules" id="rules"></div>
     </div>
   </div>
 
 <script>
 (() => {
-  // ✅ SEU WEB APP (/exec)
   const ENDPOINT = "https://script.google.com/macros/s/AKfycby0M4pxO6AlxgA8Y5PhExE_jC5XtY4yftG15Pvp5RuI6bTmFWENkObNslNfhP_Mpw1b/exec";
 
   const qs = new URLSearchParams(location.search);
   const code = (qs.get("c") || "").trim();
   const sig  = (qs.get("s") || "").trim();
+  const t    = (qs.get("t") || "").trim().toUpperCase(); // P/M/G
 
   const statusPill = document.getElementById("statusPill");
   const codePill = document.getElementById("codePill");
@@ -299,45 +215,71 @@
 
   const scratchWrap = document.getElementById("scratchWrap");
   const canvas = document.getElementById("scratch");
+
   const revealTitle = document.getElementById("revealTitle");
   const revealText  = document.getElementById("revealText");
-  const revealExtra = document.getElementById("revealExtra");
+  const prizeBox    = document.getElementById("prizeBox");
+  const afterPrizeText = document.getElementById("afterPrizeText");
 
   const form = document.getElementById("form");
   const nameEl = document.getElementById("name");
   const lastnameEl = document.getElementById("lastname");
   const whatsappEl = document.getElementById("whatsapp");
-  const sizeEl = document.getElementById("size");
   const sendBtn = document.getElementById("sendBtn");
   const resetBtn = document.getElementById("resetBtn");
+  const rulesEl = document.getElementById("rules");
 
-  function showMsg(text, kind="") {
-    msgEl.style.display = "block";
+  function setStatus(text){ statusPill.textContent = text; }
+  function showMsg(text, kind=""){
     msgEl.className = "msg" + (kind ? " " + kind : "");
     msgEl.textContent = text;
+    msgEl.style.display = "block";
+  }
+  function clearMsg(){ msgEl.style.display="none"; msgEl.textContent=""; }
+
+  function prizeFromT(tt){
+    if (tt === "P") return "Little Frangote's (Balde 8 pedaços)";
+    if (tt === "M") return "Cluck Frangote's (Balde 12 pedaços)";
+    if (tt === "G") return "Big Frangote's (Balde 16 pedaços)";
+    return "";
   }
 
-  function setStatus(text) {
-    statusPill.textContent = text;
-  }
+  // Regras bem claras
+  rulesEl.textContent =
+`Regras:
+• 1 uso por código.
+• O resgate do prêmio é válido SOMENTE em uma próxima compra.
+• Validade para resgate: 14 dias.
+• Funcionamento: quarta a domingo (o resgate deve ocorrer em dia de funcionamento).`;
 
-  // 1) Validar parâmetros
   codePill.textContent = code || "—";
 
-  if (!code || !sig) {
+  // Validação de link
+  if (!code || !sig || !t) {
     setStatus("link inválido");
     showMsg(
-      "Link inválido.\n\nEste link precisa conter:\n?c=SEU_CODIGO&s=SUA_ASSINATURA\n\nVolte e use o link gerado na planilha (coluna LINK).",
+`Link inválido.
+
+Este link precisa conter:
+?c=SEU_CODIGO&s=SUA_ASSINATURA&t=P|M|G
+
+Volte e use o link gerado na planilha (coluna LINK).`,
       "error"
     );
     return;
   }
 
-  // 2) Inicializa raspadinha
+  const prize = prizeFromT(t);
+  if (!prize) {
+    setStatus("link inválido");
+    showMsg("Parâmetro t inválido. Use link gerado na planilha.", "error");
+    return;
+  }
+
+  // Inicializa raspadinha
   setStatus("pronto para raspar");
   scratchWrap.style.display = "block";
 
-  // Canvas setup
   const ctx = canvas.getContext("2d");
   let isDown = false;
   let revealed = false;
@@ -349,19 +291,16 @@
     canvas.style.width  = rect.width + "px";
     canvas.style.height = rect.height + "px";
 
-    // Camada "raspável"
     ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
     ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = "#9a9aa3";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
-    // texto "raspe"
     ctx.fillStyle = "rgba(0,0,0,.22)";
-    ctx.font = "700 22px system-ui";
+    ctx.font = "900 22px system-ui";
     ctx.textAlign = "center";
     ctx.fillText("RASPE AQUI", rect.width/2, rect.height/2);
 
-    // brilho sutil
     const grad = ctx.createLinearGradient(0,0,rect.width,rect.height);
     grad.addColorStop(0,"rgba(255,255,255,.12)");
     grad.addColorStop(1,"rgba(0,0,0,.10)");
@@ -382,35 +321,32 @@
     const touch = ev.touches && ev.touches[0];
     const clientX = touch ? touch.clientX : ev.clientX;
     const clientY = touch ? touch.clientY : ev.clientY;
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
   function scratchedPercent() {
     const rect = canvas.getBoundingClientRect();
     const img = ctx.getImageData(0, 0, rect.width, rect.height).data;
-    // conta pixels transparentes (alpha == 0)
     let transparent = 0;
     const total = rect.width * rect.height;
-    for (let i = 3; i < img.length; i += 4) {
-      if (img[i] === 0) transparent++;
-    }
+    for (let i = 3; i < img.length; i += 4) if (img[i] === 0) transparent++;
     return transparent / total;
   }
 
   function reveal() {
     revealed = true;
     setStatus("revelado");
-    form.style.display = "flex";
-    showMsg("Agora preencha seus dados para registrar o resgate.", "ok");
 
-    // Por enquanto, título genérico.
-    // Na próxima sub-etapa vamos exibir o brinde com base em P/M/G e frequência.
-    revealTitle.textContent = "Você ganhou!";
-    revealText.textContent = "Preencha seus dados para validarmos e registrar seu resgate.";
-    revealExtra.textContent = "⚠️ O brinde varia conforme o tamanho do pedido e sua frequência na semana.";
+    // mostra prêmio e texto
+    revealTitle.textContent = "Você ganhou! 🎁";
+    revealText.textContent = "Prêmio revelado abaixo:";
+    prizeBox.style.display = "block";
+    prizeBox.textContent = "Você ganhou um " + prize;
+    afterPrizeText.style.display = "block";
+
+    // abre formulário logo abaixo
+    form.style.display = "flex";
+    clearMsg();
   }
 
   function bindCanvas() {
@@ -431,22 +367,21 @@
     revealed = false;
     isDown = false;
     form.style.display = "none";
-    msgEl.style.display = "none";
+    prizeBox.style.display = "none";
+    afterPrizeText.style.display = "none";
+    revealTitle.textContent = "Raspe para revelar";
+    revealText.textContent = "Use o dedo/mouse para raspar e revelar seu prêmio.";
+    clearMsg();
     setStatus("pronto para raspar");
     resizeCanvas();
   }
 
-  window.addEventListener("resize", () => {
-    // se já revelou, não precisa recriar o overlay
-    if (!revealed) resizeCanvas();
-  });
-
+  window.addEventListener("resize", () => { if (!revealed) resizeCanvas(); });
   resizeCanvas();
   bindCanvas();
 
   resetBtn.addEventListener("click", () => resetScratch());
 
-  // 3) Envio para o /exec
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     if (!revealed) {
@@ -457,7 +392,6 @@
     const name = nameEl.value.trim();
     const lastname = lastnameEl.value.trim();
     const whatsapp = whatsappEl.value.replace(/\D/g, "");
-    const size = (sizeEl.value || "").trim();
 
     if (!name || !lastname || whatsapp.length < 10) {
       showMsg("Preencha Nome, Sobrenome e WhatsApp corretamente.", "error");
@@ -474,10 +408,10 @@
         body: JSON.stringify({
           code,
           sig,
+          t, // P/M/G do link
           name,
           lastname,
           whatsapp,
-          size, // (opcional por enquanto) — usaremos na próxima sub-etapa
           ua: navigator.userAgent
         })
       });
@@ -493,13 +427,12 @@
       }
 
       setStatus("validado ✅");
-      showMsg("Validado e registrado com sucesso.\n\nAguarde o atendimento para aplicar o brinde conforme seu pedido e frequência.", "ok");
+      showMsg("Validado e registrado com sucesso.", "ok");
 
-      // se o backend já retornar prize futuramente, mostramos aqui
+      // Se backend retornar o texto pronto, exibimos com força
       if (data.prize) {
-        revealTitle.textContent = "Você ganhou:";
-        revealText.textContent = data.prize;
-        revealExtra.textContent = "";
+        prizeBox.style.display = "block";
+        prizeBox.textContent = data.prize;
       }
 
       sendBtn.disabled = true;
@@ -510,7 +443,6 @@
       sendBtn.disabled = false;
     }
   });
-
 })();
 </script>
 </body>
