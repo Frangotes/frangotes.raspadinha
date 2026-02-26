@@ -141,7 +141,6 @@
       line-height:1.42;
       white-space:pre-line;
     }
-    .rules b{ color:var(--text); }
   </style>
 </head>
 <body>
@@ -158,7 +157,7 @@
       <div id="msg" class="msg"></div>
 
       <div class="scratchWrap" id="scratchWrap" style="display:none;">
-        <div class="reveal" id="reveal">
+        <div class="reveal">
           <div class="gift">🎉</div>
           <h2 id="revealTitle">Raspe para revelar</h2>
           <p id="revealText">Use o dedo/mouse para raspar e revelar seu prêmio.</p>
@@ -168,10 +167,6 @@
           <p id="afterPrizeText" style="display:none;">
             <b>Preencha abaixo</b> para registrarmos seu resgate e você recuperar seu prêmio na próxima compra.
           </p>
-
-          <div class="actions" style="justify-content:center; margin-top:6px;">
-            <button type="button" id="revealNowBtn">Revelar agora</button>
-          </div>
         </div>
 
         <canvas id="scratch"></canvas>
@@ -225,8 +220,6 @@
   const prizeBox    = document.getElementById("prizeBox");
   const afterPrizeText = document.getElementById("afterPrizeText");
 
-  const revealNowBtn = document.getElementById("revealNowBtn");
-
   const form = document.getElementById("form");
   const nameEl = document.getElementById("name");
   const lastnameEl = document.getElementById("lastname");
@@ -267,7 +260,7 @@
 Este link precisa conter:
 ?c=SEU_CODIGO&s=SUA_ASSINATURA&t=P|M|G
 
-Volte e use o link gerado na planilha (coluna LINK).`,
+Use o link gerado na planilha (coluna LINK).`,
       "error"
     );
     return;
@@ -286,6 +279,9 @@ Volte e use o link gerado na planilha (coluna LINK).`,
   const ctx = canvas.getContext("2d");
   let isDown = false;
   let revealed = false;
+
+  // gatilho de segurança: se o usuário raspar em vários movimentos, revela mesmo que o cálculo falhe
+  let scratchMoves = 0;
 
   function resizeCanvas() {
     const rect = scratchWrap.getBoundingClientRect();
@@ -315,7 +311,7 @@ Volte e use o link gerado na planilha (coluna LINK).`,
     if (revealed) return;
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
-    ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.arc(x, y, 22, 0, Math.PI * 2); // raio maior = revela mais rápido
     ctx.fill();
   }
 
@@ -327,13 +323,26 @@ Volte e use o link gerado na planilha (coluna LINK).`,
     return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
-  function scratchedPercent() {
+  // calcula um "percentual aproximado" por amostragem (mais rápido e confiável)
+  function scratchedPercentSampled() {
     const rect = canvas.getBoundingClientRect();
-    const img = ctx.getImageData(0, 0, rect.width, rect.height).data;
-    let transparent = 0;
-    const total = rect.width * rect.height;
-    for (let i = 3; i < img.length; i += 4) if (img[i] === 0) transparent++;
-    return transparent / total;
+    const w = Math.max(1, Math.floor(rect.width));
+    const h = Math.max(1, Math.floor(rect.height));
+
+    // amostragem em grade 40x20 (800 pontos)
+    const sx = 40, sy = 20;
+    let cleared = 0, total = sx * sy;
+
+    const img = ctx.getImageData(0, 0, w, h).data;
+    for (let gy = 0; gy < sy; gy++) {
+      for (let gx = 0; gx < sx; gx++) {
+        const px = Math.floor((gx + 0.5) * (w / sx));
+        const py = Math.floor((gy + 0.5) * (h / sy));
+        const idx = (py * w + px) * 4 + 3; // alpha
+        if (img[idx] === 0) cleared++;
+      }
+    }
+    return cleared / total;
   }
 
   function reveal() {
@@ -349,10 +358,46 @@ Volte e use o link gerado na planilha (coluna LINK).`,
     clearMsg();
   }
 
+  function maybeReveal() {
+    if (revealed) return;
+
+    // 1) regra por percentual (bem sensível)
+    const pct = scratchedPercentSampled();
+    if (pct >= 0.18) { // 18% já revela
+      reveal();
+      return;
+    }
+
+    // 2) gatilho por movimento (segurança)
+    if (scratchMoves >= 35) {
+      reveal();
+    }
+  }
+
   function bindCanvas() {
-    const down = (ev) => { isDown = true; const p = getXY(ev); scratchAt(p.x, p.y); ev.preventDefault(); };
-    const move = (ev) => { if (!isDown) return; const p = getXY(ev); scratchAt(p.x, p.y); ev.preventDefault(); };
-    const up   = () => { isDown = false; if (!revealed && scratchedPercent() > 0.30) reveal(); };
+    const down = (ev) => {
+      isDown = true;
+      scratchMoves = Math.min(1000, scratchMoves + 1);
+      const p = getXY(ev);
+      scratchAt(p.x, p.y);
+      maybeReveal();
+      ev.preventDefault();
+    };
+
+    const move = (ev) => {
+      if (!isDown) return;
+      scratchMoves = Math.min(1000, scratchMoves + 1);
+      const p = getXY(ev);
+      scratchAt(p.x, p.y);
+      // checa a cada alguns movimentos para não pesar
+      if (scratchMoves % 4 === 0) maybeReveal();
+      ev.preventDefault();
+    };
+
+    const up = () => {
+      isDown = false;
+      maybeReveal();
+    };
 
     canvas.addEventListener("mousedown", down);
     canvas.addEventListener("mousemove", move);
@@ -366,19 +411,18 @@ Volte e use o link gerado na planilha (coluna LINK).`,
   function resetScratch() {
     revealed = false;
     isDown = false;
+    scratchMoves = 0;
+
     form.style.display = "none";
     prizeBox.style.display = "none";
     afterPrizeText.style.display = "none";
+
     revealTitle.textContent = "Raspe para revelar";
     revealText.textContent = "Use o dedo/mouse para raspar e revelar seu prêmio.";
     clearMsg();
     setStatus("pronto para raspar");
     resizeCanvas();
   }
-
-  revealNowBtn.addEventListener("click", () => {
-    if (!revealed) reveal();
-  });
 
   window.addEventListener("resize", () => { if (!revealed) resizeCanvas(); });
   resizeCanvas();
