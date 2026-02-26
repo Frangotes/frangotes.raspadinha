@@ -1,234 +1,517 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Raspadinha Frangote's</title>
   <style>
-    body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;padding:22px}
-    .wrap{width:min(520px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
-    .logo img{max-width:180px;height:auto;display:block}
-    h2{margin:0;text-align:center}
-    .card{width:100%;background:#1b1b1b;border:1px solid #2b2b2b;border-radius:16px;padding:14px;box-sizing:border-box}
-    .msg{margin-top:6px;font-size:14px;color:#ddd}
-    .msg.err{color:#ff7b7b}
-
-    #container{position:relative;width:100%;height:240px;border-radius:16px;overflow:hidden;display:none;margin-top:12px}
-    #prize{position:absolute;inset:0;background:linear-gradient(45deg,#ffcc00,#ff8800);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-align:center;padding:18px;box-sizing:border-box}
-    canvas{position:absolute;inset:0}
-
-    .meta{display:none;margin-top:10px;font-size:12px;color:#cfcfcf;line-height:1.35}
-    .meta b{color:#fff}
-
-    .rules{margin-top:14px;font-size:13px;line-height:1.35;color:#d7d7d7}
-
-    .form{display:none;margin-top:12px;background:#121212;border:1px solid #2b2b2b;border-radius:14px;padding:12px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row input{flex:1;min-width:140px;padding:12px;border-radius:12px;border:1px solid #333;background:#0f0f0f;color:#fff;outline:none;box-sizing:border-box}
-    .row button{padding:12px 14px;border-radius:12px;border:0;background:#ffcc00;font-weight:800;cursor:pointer}
-    .hint{margin-top:8px;font-size:12px;color:#bbb}
+    :root{
+      --bg:#0b0b0c;
+      --card:#141416;
+      --muted:#a9a9b2;
+      --text:#f2f2f4;
+      --accent:#ff3b3b;
+      --ok:#2bd576;
+      --warn:#ffcc00;
+      --shadow: 0 20px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --w: min(680px, 92vw);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 50% 0%, #1a1a1d 0%, var(--bg) 55%, #050506 100%);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px 0;
+    }
+    .wrap{
+      width:var(--w);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+    }
+    .logo{
+      width:180px;
+      height:auto;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.55));
+      margin-top:4px;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(22px, 4vw, 30px);
+      letter-spacing:.2px;
+      text-align:center;
+    }
+    .card{
+      width:100%;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .row{
+      display:flex; gap:12px; flex-wrap:wrap;
+      align-items:center; justify-content:space-between;
+    }
+    .pill{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.25);
+      color:var(--muted);
+    }
+    .pill strong{ color:var(--text); font-weight:700 }
+    .msg{
+      margin-top:10px;
+      padding:12px 12px;
+      border-radius:14px;
+      background: rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+      white-space:pre-line;
+    }
+    .msg.error{ border-color: rgba(255,59,59,.45); color:#ffd4d4 }
+    .msg.ok{ border-color: rgba(43,213,118,.35); color:#d7ffe8 }
+    .scratchWrap{
+      margin-top:14px;
+      width:100%;
+      border-radius: 18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background: #0f0f12;
+      position:relative;
+    }
+    .reveal{
+      padding:16px;
+      min-height:190px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      text-align:center;
+    }
+    .gift{
+      font-size:38px;
+      line-height:1;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.45));
+    }
+    .reveal h2{
+      margin:0;
+      font-size:22px;
+    }
+    .reveal p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      max-width: 52ch;
+    }
+    canvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      touch-action:none;
+      cursor: crosshair;
+    }
+    .hint{
+      position:absolute;
+      inset:auto 10px 10px 10px;
+      display:flex;
+      justify-content:center;
+      pointer-events:none;
+      opacity:.92;
+    }
+    .hint span{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.14);
+      color: var(--muted);
+      backdrop-filter: blur(6px);
+    }
+    .form{
+      margin-top:14px;
+      display:none;
+      gap:10px;
+      flex-direction:column;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .grid .full{ grid-column: 1 / -1; }
+    label{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    input, select{
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      color: var(--text);
+      outline:none;
+    }
+    input:focus, select:focus{
+      border-color: rgba(255,255,255,.25);
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+      margin-top:4px;
+    }
+    button{
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      cursor:pointer;
+      font-weight:700;
+    }
+    button.primary{
+      background: linear-gradient(180deg, rgba(255,59,59,.95), rgba(200,20,20,.95));
+      border-color: rgba(255,59,59,.45);
+    }
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+    .rules{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
+    .rules b{ color:var(--text); }
+    .small{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="logo"><img src="logo.png" alt="Frangote's"></div>
-    <h2>Raspe para revelar 🎁</h2>
+
+    <!-- Troque o src abaixo pelo link do seu logo se quiser -->
+    <img class="logo" alt="Frangote's" src="logo.png" onerror="this.style.display='none'"/>
+
+    <h1>Raspe para revelar 🎁</h1>
 
     <div class="card">
-      <div id="msg" class="msg">Carregando...</div>
+      <div class="row">
+        <div class="pill">Status: <strong id="statusPill">carregando…</strong></div>
+        <div class="pill">Código: <strong id="codePill">—</strong></div>
+      </div>
 
-      <div id="container">
-        <div id="prize"></div>
+      <div id="msg" class="msg" style="display:none;"></div>
+
+      <div class="scratchWrap" id="scratchWrap" style="display:none;">
+        <div class="reveal" id="reveal">
+          <div class="gift">🎉</div>
+          <h2 id="revealTitle">Você ganhou!</h2>
+          <p id="revealText">
+            Preencha seus dados para validarmos e registrar seu resgate.
+          </p>
+          <div class="small" id="revealExtra"></div>
+        </div>
+
         <canvas id="scratch"></canvas>
+
+        <div class="hint"><span>Use o dedo/mouse para raspar</span></div>
       </div>
 
-      <div class="meta" id="meta"></div>
+      <form class="form" id="form">
+        <div class="grid">
+          <label>
+            Nome
+            <input id="name" autocomplete="given-name" required maxlength="60" />
+          </label>
+          <label>
+            Sobrenome
+            <input id="lastname" autocomplete="family-name" required maxlength="80" />
+          </label>
+          <label class="full">
+            WhatsApp (somente números)
+            <input id="whatsapp" inputmode="numeric" autocomplete="tel" required maxlength="20" placeholder="Ex: 86999999999" />
+          </label>
 
-      <div class="form" id="form">
-        <div style="font-weight:800;margin-bottom:8px">Para controle interno (opcional):</div>
-        <div class="row">
-          <input id="firstName" placeholder="Nome"/>
-          <input id="lastName" placeholder="Sobrenome"/>
+          <!-- Por enquanto, opcional: tamanho do pedido.
+               Na próxima sub-etapa vamos usar isso para calcular/mostrar o prêmio P/M/G corretamente. -->
+          <label class="full">
+            Tamanho do seu pedido (para calcular o brinde)
+            <select id="size">
+              <option value="">Selecione (opcional por enquanto)</option>
+              <option value="P">P (8 pedaços)</option>
+              <option value="M">M (12 pedaços)</option>
+              <option value="G">G (12 pedaços)</option>
+            </select>
+          </label>
         </div>
-        <div class="row" style="margin-top:10px;">
-          <input id="whats" placeholder="WhatsApp (DDD + número)"/>
-          <button id="saveBtn">Enviar</button>
+
+        <div class="actions">
+          <button type="button" id="resetBtn">Raspar de novo</button>
+          <button class="primary" type="submit" id="sendBtn">Validar e registrar</button>
         </div>
-        <div class="hint" id="formHint"></div>
-      </div>
+      </form>
 
       <div class="rules">
-        <b>Regras:</b><br>
-        • Para resgatar seu prêmio, você deve realizar uma compra de qualquer produto Frangote's.<br>
-        • Validade: 7 dias (se cair em dia fechado, prorroga para quarta).<br>
-        • Funcionamento: quarta a domingo.<br>
-        • 1 uso por código. Brinde válido somente com apresentação desta tela (comprovante) e validação.
+        <b>Regras:</b><br/>
+        • 1 uso por código.<br/>
+        • Para resgatar o brinde, é necessário realizar um pedido.<br/>
+        • O brinde varia conforme o pedido e a frequência da semana.<br/>
       </div>
     </div>
   </div>
 
 <script>
-  // COLE AQUI a URL /exec do Apps Script (Web App)
-  const API_URL = "https://script.google.com/macros/s/AKfycbwpGKyZnLpVhqeD0EdOiJWOjZyQW2YVDkaS8ULiY2KLRmooQXByisewtWLMwioZsGHT/exec";
+(() => {
+  // ✅ SEU WEB APP (/exec)
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycby0M4pxO6AlxgA8Y5PhExE_jC5XtY4yftG15Pvp5RuI6bTmFWENkObNslNfhP_Mpw1b/exec";
 
-  const msg = document.getElementById("msg");
-  const container = document.getElementById("container");
-  const prizeBox = document.getElementById("prize");
-  const meta = document.getElementById("meta");
+  const qs = new URLSearchParams(location.search);
+  const code = (qs.get("c") || "").trim();
+  const sig  = (qs.get("s") || "").trim();
+
+  const statusPill = document.getElementById("statusPill");
+  const codePill = document.getElementById("codePill");
+  const msgEl = document.getElementById("msg");
+
+  const scratchWrap = document.getElementById("scratchWrap");
   const canvas = document.getElementById("scratch");
-  const ctx = canvas.getContext("2d");
+  const revealTitle = document.getElementById("revealTitle");
+  const revealText  = document.getElementById("revealText");
+  const revealExtra = document.getElementById("revealExtra");
 
   const form = document.getElementById("form");
-  const firstName = document.getElementById("firstName");
-  const lastName = document.getElementById("lastName");
-  const whats = document.getElementById("whats");
-  const saveBtn = document.getElementById("saveBtn");
-  const formHint = document.getElementById("formHint");
+  const nameEl = document.getElementById("name");
+  const lastnameEl = document.getElementById("lastname");
+  const whatsappEl = document.getElementById("whatsapp");
+  const sizeEl = document.getElementById("size");
+  const sendBtn = document.getElementById("sendBtn");
+  const resetBtn = document.getElementById("resetBtn");
 
-  let CURRENT_CODE = "";
-  let CURRENT_TOKEN = "";
-
-  function showError(t){ msg.textContent=t; msg.className="msg err"; }
-  function showInfo(t){ msg.textContent=t; msg.className="msg"; }
-
-  function getCode(){
-    const p = new URLSearchParams(window.location.search);
-    return (p.get("code") || "").trim().toUpperCase();
+  function showMsg(text, kind="") {
+    msgEl.style.display = "block";
+    msgEl.className = "msg" + (kind ? " " + kind : "");
+    msgEl.textContent = text;
   }
 
-  function jsonp(url, cb){
-    const cbName = "cb_" + Date.now() + "_" + Math.floor(Math.random()*99999);
-    window[cbName] = (data) => {
-      try{ delete window[cbName]; }catch(e){}
-      script.remove();
-      cb(data);
-    };
-    const script = document.createElement("script");
-    script.onerror = () => {
-      try{ delete window[cbName]; }catch(e){}
-      cb({ok:false,error:"Erro de conexão. Tente novamente."});
-    };
-    script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + encodeURIComponent(cbName);
-    document.body.appendChild(script);
+  function setStatus(text) {
+    statusPill.textContent = text;
   }
 
-  function startScratch(){
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
+  // 1) Validar parâmetros
+  codePill.textContent = code || "—";
 
+  if (!code || !sig) {
+    setStatus("link inválido");
+    showMsg(
+      "Link inválido.\n\nEste link precisa conter:\n?c=SEU_CODIGO&s=SUA_ASSINATURA\n\nVolte e use o link gerado na planilha (coluna LINK).",
+      "error"
+    );
+    return;
+  }
+
+  // 2) Inicializa raspadinha
+  setStatus("pronto para raspar");
+  scratchWrap.style.display = "block";
+
+  // Canvas setup
+  const ctx = canvas.getContext("2d");
+  let isDown = false;
+  let revealed = false;
+
+  function resizeCanvas() {
+    const rect = scratchWrap.getBoundingClientRect();
+    canvas.width  = Math.floor(rect.width  * devicePixelRatio);
+    canvas.height = Math.floor(rect.height * devicePixelRatio);
+    canvas.style.width  = rect.width + "px";
+    canvas.style.height = rect.height + "px";
+
+    // Camada "raspável"
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "#9a9a9a";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#9a9aa3";
+    ctx.fillRect(0, 0, rect.width, rect.height);
 
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
-    ctx.font = "bold 22px Arial";
+    // texto "raspe"
+    ctx.fillStyle = "rgba(0,0,0,.22)";
+    ctx.font = "700 22px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("RASPE AQUI", canvas.width/2, canvas.height/2);
+    ctx.fillText("RASPE AQUI", rect.width/2, rect.height/2);
 
-    const scratchAt = (clientX, clientY) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-      ctx.globalCompositeOperation="destination-out";
-      ctx.beginPath();
-      ctx.arc(x,y,22,0,Math.PI*2);
-      ctx.fill();
+    // brilho sutil
+    const grad = ctx.createLinearGradient(0,0,rect.width,rect.height);
+    grad.addColorStop(0,"rgba(255,255,255,.12)");
+    grad.addColorStop(1,"rgba(0,0,0,.10)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,rect.width,rect.height);
+  }
+
+  function scratchAt(x, y) {
+    if (revealed) return;
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function getXY(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = ev.touches && ev.touches[0];
+    const clientX = touch ? touch.clientX : ev.clientX;
+    const clientY = touch ? touch.clientY : ev.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
     };
-
-    canvas.onmousemove = (e) => { if (e.buttons!==1) return; scratchAt(e.clientX,e.clientY); };
-    canvas.ontouchstart = (e) => { e.preventDefault(); const t=e.touches[0]; scratchAt(t.clientX,t.clientY); };
-    canvas.ontouchmove  = (e) => { e.preventDefault(); const t=e.touches[0]; scratchAt(t.clientX,t.clientY); };
   }
 
-  function redeem(code){
-    if (!API_URL || API_URL.includes("COLE_AQUI")) {
-      showError("Falta configurar a URL do Apps Script no index.html.");
-      return;
+  function scratchedPercent() {
+    const rect = canvas.getBoundingClientRect();
+    const img = ctx.getImageData(0, 0, rect.width, rect.height).data;
+    // conta pixels transparentes (alpha == 0)
+    let transparent = 0;
+    const total = rect.width * rect.height;
+    for (let i = 3; i < img.length; i += 4) {
+      if (img[i] === 0) transparent++;
     }
-
-    showInfo("Validando...");
-    container.style.display="none";
-    meta.style.display="none";
-    form.style.display="none";
-    formHint.textContent="";
-
-    const url = API_URL + "?action=redeem&code=" + encodeURIComponent(code);
-
-    jsonp(url, (data) => {
-      if(!data || !data.ok){
-        showError((data && data.error) ? data.error : "Falha ao validar.");
-        return;
-      }
-
-      CURRENT_CODE = data.code;
-      CURRENT_TOKEN = data.token;
-
-      showInfo("Raspe para revelar 🎁");
-      prizeBox.textContent = data.prize || "Brinde";
-      container.style.display="block";
-      startScratch();
-
-      meta.innerHTML =
-        `<b>Código:</b> ${escapeHtml(data.code)}<br>` +
-        `<b>Token:</b> ${escapeHtml(data.token)}<br>` +
-        `<b>Válido até:</b> ${new Date(data.valid_until).toLocaleString()}`;
-      meta.style.display="block";
-
-      form.style.display="block";
-      formHint.textContent = "Opcional: preencha para controle interno.";
-    });
+    return transparent / total;
   }
 
-  saveBtn.addEventListener("click", () => {
-    const fn = (firstName.value || "").trim();
-    const ln = (lastName.value || "").trim();
-    const wa = (whats.value || "").trim();
+  function reveal() {
+    revealed = true;
+    setStatus("revelado");
+    form.style.display = "flex";
+    showMsg("Agora preencha seus dados para registrar o resgate.", "ok");
 
-    if(!fn || !ln || !wa){
-      formHint.textContent = "Preencha Nome, Sobrenome e WhatsApp.";
-      return;
-    }
-    saveBtn.disabled = true;
-    formHint.textContent = "Enviando...";
+    // Por enquanto, título genérico.
+    // Na próxima sub-etapa vamos exibir o brinde com base em P/M/G e frequência.
+    revealTitle.textContent = "Você ganhou!";
+    revealText.textContent = "Preencha seus dados para validarmos e registrar seu resgate.";
+    revealExtra.textContent = "⚠️ O brinde varia conforme o tamanho do pedido e sua frequência na semana.";
+  }
 
-    const url = API_URL
-      + "?action=claim"
-      + "&code=" + encodeURIComponent(CURRENT_CODE)
-      + "&token=" + encodeURIComponent(CURRENT_TOKEN)
-      + "&first_name=" + encodeURIComponent(fn)
-      + "&last_name=" + encodeURIComponent(ln)
-      + "&whatsapp=" + encodeURIComponent(wa);
+  function bindCanvas() {
+    const down = (ev) => { isDown = true; const p = getXY(ev); scratchAt(p.x, p.y); ev.preventDefault(); };
+    const move = (ev) => { if (!isDown) return; const p = getXY(ev); scratchAt(p.x, p.y); ev.preventDefault(); };
+    const up   = () => { isDown = false; if (!revealed && scratchedPercent() > 0.45) reveal(); };
 
-    jsonp(url, (data) => {
-      saveBtn.disabled = false;
-      if(!data || !data.ok){
-        formHint.textContent = (data && data.error) ? data.error : "Falha ao registrar.";
-        return;
-      }
-      formHint.textContent = "Registrado ✅";
-      firstName.disabled = true;
-      lastName.disabled = true;
-      whats.disabled = true;
-      saveBtn.disabled = true;
-    });
+    canvas.addEventListener("mousedown", down);
+    canvas.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+
+    canvas.addEventListener("touchstart", down, {passive:false});
+    canvas.addEventListener("touchmove", move, {passive:false});
+    window.addEventListener("touchend", up);
+  }
+
+  function resetScratch() {
+    revealed = false;
+    isDown = false;
+    form.style.display = "none";
+    msgEl.style.display = "none";
+    setStatus("pronto para raspar");
+    resizeCanvas();
+  }
+
+  window.addEventListener("resize", () => {
+    // se já revelou, não precisa recriar o overlay
+    if (!revealed) resizeCanvas();
   });
 
-  function escapeHtml(str){
-    return String(str || "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+  resizeCanvas();
+  bindCanvas();
 
-  // INIT
-  const code = getCode();
-  if(!code){
-    showError("Link inválido. Este link precisa conter ?code=SEU-CODIGO");
-  } else {
-    redeem(code);
-  }
+  resetBtn.addEventListener("click", () => resetScratch());
+
+  // 3) Envio para o /exec
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    if (!revealed) {
+      showMsg("Primeiro raspe para revelar.", "error");
+      return;
+    }
+
+    const name = nameEl.value.trim();
+    const lastname = lastnameEl.value.trim();
+    const whatsapp = whatsappEl.value.replace(/\D/g, "");
+    const size = (sizeEl.value || "").trim();
+
+    if (!name || !lastname || whatsapp.length < 10) {
+      showMsg("Preencha Nome, Sobrenome e WhatsApp corretamente.", "error");
+      return;
+    }
+
+    sendBtn.disabled = true;
+    setStatus("validando...");
+
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          code,
+          sig,
+          name,
+          lastname,
+          whatsapp,
+          size, // (opcional por enquanto) — usaremos na próxima sub-etapa
+          ua: navigator.userAgent
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!data || !data.ok) {
+        const err = (data && (data.error || data.details)) ? `${data.error}${data.details ? " - " + data.details : ""}` : "Erro desconhecido";
+        setStatus("não validado");
+        showMsg("Não foi possível validar.\n\nMotivo: " + err, "error");
+        sendBtn.disabled = false;
+        return;
+      }
+
+      setStatus("validado ✅");
+      showMsg("Validado e registrado com sucesso.\n\nAguarde o atendimento para aplicar o brinde conforme seu pedido e frequência.", "ok");
+
+      // se o backend já retornar prize futuramente, mostramos aqui
+      if (data.prize) {
+        revealTitle.textContent = "Você ganhou:";
+        revealText.textContent = data.prize;
+        revealExtra.textContent = "";
+      }
+
+      sendBtn.disabled = true;
+
+    } catch (e) {
+      setStatus("erro");
+      showMsg("Falha de conexão ao validar. Tente novamente.", "error");
+      sendBtn.disabled = false;
+    }
+  });
+
+})();
 </script>
 </body>
 </html>
