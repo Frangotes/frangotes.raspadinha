@@ -54,7 +54,7 @@
     .msg.error{ border-color: rgba(255,59,59,.45); color:#ffd4d4; display:block;}
     .msg.ok{ border-color: rgba(43,213,118,.35); color:#d7ffe8; display:block;}
 
-    /* IMPORTANT: layers */
+    /* RASPAGEM */
     .scratchWrap{
       margin-top:14px; width:100%;
       border-radius: 18px; overflow:hidden;
@@ -63,6 +63,8 @@
       position:relative;
       min-height: 220px;
     }
+
+    /* Conteúdo do prêmio fica ATRÁS do verniz (canvas) */
     .reveal{
       padding:16px;
       min-height:220px;
@@ -70,41 +72,41 @@
       align-items:center; justify-content:center;
       gap:8px; text-align:center;
       position:relative;
-      z-index: 3; /* ABOVE the canvas */
-      pointer-events:none; /* avoid blocking scratch; inputs are outside */
+      z-index: 1;           /* abaixo do canvas */
+      pointer-events:none;  /* não atrapalha a raspagem */
     }
     .gift{ font-size:38px; line-height:1; filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); }
     .reveal h2{ margin:0; font-size:22px; text-shadow: 0 10px 24px rgba(0,0,0,.55); }
     .reveal p{ margin:0; color:var(--muted); font-size:14px; max-width: 60ch; text-shadow: 0 10px 24px rgba(0,0,0,.55); }
+
     .reveal .prizeBox{
       margin-top:10px;
       padding:12px 14px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.38);
+      background: rgba(0,0,0,.35);
       width:100%;
       max-width: 560px;
       font-weight:900;
       line-height:1.35;
       white-space:pre-line;
-      display:none;
       color: var(--text);
-      text-shadow:none;
     }
 
+    /* Verniz */
     canvas{
       position:absolute; inset:0;
       width:100%; height:100%;
       touch-action:none;
       cursor: crosshair;
-      z-index: 2; /* BELOW reveal text, but still visible */
+      z-index: 2; /* acima do prêmio */
     }
 
     .hint{
       position:absolute; inset:auto 10px 10px 10px;
       display:flex; justify-content:center;
       pointer-events:none; opacity:.92;
-      z-index: 4;
+      z-index: 3;
     }
     .hint span{
       font-size:12px; padding:6px 10px;
@@ -115,6 +117,7 @@
       backdrop-filter: blur(6px);
     }
 
+    /* FORM */
     .form{
       margin-top:14px;
       display:none;
@@ -123,6 +126,17 @@
       border-top:1px solid rgba(255,255,255,.10);
       padding-top:14px;
     }
+    .formNote{
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .formNote b{ color: var(--text); }
+
     .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .grid .full{ grid-column: 1 / -1; }
     label{ display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted); }
@@ -148,6 +162,7 @@
       background: linear-gradient(180deg, rgba(255,59,59,.95), rgba(200,20,20,.95));
       border-color: rgba(255,59,59,.45);
     }
+
     .rules{
       margin-top:10px;
       color:var(--muted);
@@ -171,14 +186,14 @@
       <div id="msg" class="msg"></div>
 
       <div class="scratchWrap" id="scratchWrap" style="display:none;">
+        <!-- IMPORTANTE:
+             este conteúdo já está pronto DESDE O INÍCIO, atrás do verniz.
+             Assim ele não “aparece do nada”; ele vai surgindo conforme raspa. -->
         <div class="reveal">
-          <div class="gift"></div>
-          <h2 id="revealTitle"></h2>
-          <p id="revealText"></p>
-          <div class="prizeBox" id="prizeBox"></div>
-          <p id="afterPrizeText" style="display:none;">
-            <b>Preencha abaixo</b> para registrarmos seu resgate e você recuperar seu prêmio na próxima compra.
-          </p>
+          <div class="gift">🎉</div>
+          <h2>Você ganhou! 🎁</h2>
+          <p>Prêmio revelado:</p>
+          <div class="prizeBox" id="prizeBox">Carregando prêmio…</div>
         </div>
 
         <canvas id="scratch"></canvas>
@@ -186,6 +201,10 @@
       </div>
 
       <form class="form" id="form">
+        <div class="formNote">
+          <b>Preencha abaixo</b> para registrarmos seu resgate e você recuperar seu prêmio na próxima compra.
+        </div>
+
         <div class="grid">
           <label>
             Nome
@@ -227,10 +246,7 @@
   const scratchWrap = document.getElementById("scratchWrap");
   const canvas = document.getElementById("scratch");
 
-  const revealTitle = document.getElementById("revealTitle");
-  const revealText  = document.getElementById("revealText");
-  const prizeBox    = document.getElementById("prizeBox");
-  const afterPrizeText = document.getElementById("afterPrizeText");
+  const prizeBox = document.getElementById("prizeBox");
 
   const form = document.getElementById("form");
   const nameEl = document.getElementById("name");
@@ -248,10 +264,11 @@
   }
   function clearMsg(){ msgEl.style.display="none"; msgEl.textContent=""; }
 
+  // ✅ SEM detalhes internos (NÃO mostrar balde/pedaços)
   function prizeFromT(tt){
-    if (tt === "P") return "Little Frangote's (Balde 8 pedaços)";
-    if (tt === "M") return "Cluck Frangote's (Balde 12 pedaços)";
-    if (tt === "G") return "Big Frangote's (Balde 16 pedaços)";
+    if (tt === "P") return "Você ganhou um Little Frangote's";
+    if (tt === "M") return "Você ganhou um Cluck Frangote's";
+    if (tt === "G") return "Você ganhou um Big Frangote's";
     return "";
   }
 
@@ -278,12 +295,15 @@ Use o link gerado na planilha (coluna LINK).`,
     return;
   }
 
-  const prize = prizeFromT(t);
-  if (!prize) {
+  const prizeText = prizeFromT(t);
+  if (!prizeText) {
     setStatus("link inválido");
     showMsg("Parâmetro t inválido. Use link gerado na planilha.", "error");
     return;
   }
+
+  // O prêmio já fica “por trás do verniz”
+  prizeBox.textContent = prizeText;
 
   setStatus("pronto para raspar");
   scratchWrap.style.display = "block";
@@ -292,7 +312,7 @@ Use o link gerado na planilha (coluna LINK).`,
   let isDown = false;
   let revealed = false;
 
-  // gatilhos
+  // gatilhos (revela o FORM, não o texto — o texto já está atrás)
   let scratchMoves = 0;
 
   function resizeCanvas() {
@@ -309,6 +329,7 @@ Use o link gerado na planilha (coluna LINK).`,
     ctx.fillStyle = "#9a9aa3";
     ctx.fillRect(0, 0, w, h);
 
+    // texto no próprio verniz (não é o prêmio)
     ctx.fillStyle = "rgba(0,0,0,.22)";
     ctx.font = "900 22px system-ui";
     ctx.textAlign = "center";
@@ -321,7 +342,7 @@ Use o link gerado na planilha (coluna LINK).`,
     ctx.fillRect(0,0,w,h);
   }
 
-  // IMPORTANT: mesmo após revelar, ainda pode raspar o resto
+  // permite raspar sempre (inclusive depois de revelar)
   function scratchAt(x, y) {
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
@@ -357,25 +378,19 @@ Use o link gerado na planilha (coluna LINK).`,
     return cleared / total;
   }
 
-  function reveal() {
+  function revealForm() {
     if (revealed) return;
     revealed = true;
     setStatus("revelado");
-
-    revealTitle.textContent = "Você ganhou! 🎁";
-    revealText.textContent = "Prêmio revelado:";
-    prizeBox.style.display = "block";
-    prizeBox.textContent = "Você ganhou um " + prize;
-    afterPrizeText.style.display = "block";
-    form.style.display = "flex";
+    form.style.display = "flex"; // ✅ somente o formulário “aparece”
     clearMsg();
   }
 
   function maybeReveal() {
     if (revealed) return;
     const pct = scratchedPercentSampled();
-    if (pct >= 0.18) { reveal(); return; }
-    if (scratchMoves >= 35) reveal();
+    if (pct >= 0.18) { revealForm(); return; }
+    if (scratchMoves >= 35) revealForm();
   }
 
   function bindCanvas() {
@@ -417,11 +432,6 @@ Use o link gerado na planilha (coluna LINK).`,
     scratchMoves = 0;
 
     form.style.display = "none";
-    prizeBox.style.display = "none";
-    afterPrizeText.style.display = "none";
-
-    revealTitle.textContent = "Raspe para revelar";
-    revealText.textContent = "Use o dedo/mouse para raspar e revelar seu prêmio.";
     clearMsg();
     setStatus("pronto para raspar");
     resizeCanvas();
@@ -471,7 +481,6 @@ Use o link gerado na planilha (coluna LINK).`,
 
       setStatus("validado ✅");
       showMsg("Validado e registrado com sucesso.", "ok");
-
       sendBtn.disabled = true;
 
     } catch (e) {
