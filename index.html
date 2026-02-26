@@ -7,11 +7,8 @@
   <style>
     :root{
       --bg:#0b0b0c;
-      --card:#141416;
       --muted:#a9a9b2;
       --text:#f2f2f4;
-      --accent:#ff3b3b;
-      --ok:#2bd576;
       --shadow: 0 20px 60px rgba(0,0,0,.55);
       --radius: 18px;
       --w: min(720px, 92vw);
@@ -30,7 +27,7 @@
     }
     .wrap{ width:var(--w); display:flex; flex-direction:column; align-items:center; gap:16px; }
     .logo{ width:180px; height:auto; filter: drop-shadow(0 10px 18px rgba(0,0,0,.55)); margin-top:4px; }
-    h1{ margin:0; font-size: clamp(22px, 4vw, 30px); text-align:center; }
+    h1{ margin:0; font-size: clamp(22px, 4vw, 30px); text-align:center; letter-spacing:.6px; }
     .card{
       width:100%;
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
@@ -64,7 +61,7 @@
       position:relative;
     }
     .reveal{
-      padding:16px; min-height:190px;
+      padding:16px; min-height:200px;
       display:flex; flex-direction:column;
       align-items:center; justify-content:center;
       gap:8px; text-align:center;
@@ -80,8 +77,10 @@
       background: rgba(0,0,0,.25);
       width:100%;
       max-width: 560px;
-      font-weight:800;
+      font-weight:900;
       line-height:1.35;
+      white-space:pre-line;
+      display:none;
     }
     canvas{
       position:absolute; inset:0;
@@ -129,13 +128,12 @@
       background: rgba(255,255,255,.08);
       color: var(--text);
       cursor:pointer;
-      font-weight:800;
+      font-weight:900;
     }
     button.primary{
       background: linear-gradient(180deg, rgba(255,59,59,.95), rgba(200,20,20,.95));
       border-color: rgba(255,59,59,.45);
     }
-    button:disabled{ opacity:.55; cursor:not-allowed; }
     .rules{
       margin-top:10px;
       color:var(--muted);
@@ -162,12 +160,18 @@
       <div class="scratchWrap" id="scratchWrap" style="display:none;">
         <div class="reveal" id="reveal">
           <div class="gift">🎉</div>
-          <h2 id="revealTitle">Raspe para revelar</h2>
-          <p id="revealText">Use o dedo/mouse para raspar e revelar seu prêmio.</p>
-          <div class="prizeBox" id="prizeBox" style="display:none;"></div>
+          <h2 id="revealTitle"></h2>
+          <p id="revealText"></p>
+
+          <div class="prizeBox" id="prizeBox"></div>
+
           <p id="afterPrizeText" style="display:none;">
-            Preencha as informações abaixo para registrar e recuperar seu prêmio.
+            <b>Preencha abaixo</b> para registrarmos seu resgate e você recuperar seu prêmio na próxima compra.
           </p>
+
+          <div class="actions" style="justify-content:center; margin-top:6px;">
+            <button type="button" id="revealNowBtn">Revelar agora</button>
+          </div>
         </div>
 
         <canvas id="scratch"></canvas>
@@ -221,6 +225,8 @@
   const prizeBox    = document.getElementById("prizeBox");
   const afterPrizeText = document.getElementById("afterPrizeText");
 
+  const revealNowBtn = document.getElementById("revealNowBtn");
+
   const form = document.getElementById("form");
   const nameEl = document.getElementById("name");
   const lastnameEl = document.getElementById("lastname");
@@ -244,7 +250,6 @@
     return "";
   }
 
-  // Regras bem claras
   rulesEl.textContent =
 `Regras:
 • 1 uso por código.
@@ -254,7 +259,6 @@
 
   codePill.textContent = code || "—";
 
-  // Validação de link
   if (!code || !sig || !t) {
     setStatus("link inválido");
     showMsg(
@@ -276,7 +280,6 @@ Volte e use o link gerado na planilha (coluna LINK).`,
     return;
   }
 
-  // Inicializa raspadinha
   setStatus("pronto para raspar");
   scratchWrap.style.display = "block";
 
@@ -337,14 +340,11 @@ Volte e use o link gerado na planilha (coluna LINK).`,
     revealed = true;
     setStatus("revelado");
 
-    // mostra prêmio e texto
     revealTitle.textContent = "Você ganhou! 🎁";
-    revealText.textContent = "Prêmio revelado abaixo:";
+    revealText.textContent = "Prêmio revelado:";
     prizeBox.style.display = "block";
     prizeBox.textContent = "Você ganhou um " + prize;
     afterPrizeText.style.display = "block";
-
-    // abre formulário logo abaixo
     form.style.display = "flex";
     clearMsg();
   }
@@ -352,7 +352,7 @@ Volte e use o link gerado na planilha (coluna LINK).`,
   function bindCanvas() {
     const down = (ev) => { isDown = true; const p = getXY(ev); scratchAt(p.x, p.y); ev.preventDefault(); };
     const move = (ev) => { if (!isDown) return; const p = getXY(ev); scratchAt(p.x, p.y); ev.preventDefault(); };
-    const up   = () => { isDown = false; if (!revealed && scratchedPercent() > 0.45) reveal(); };
+    const up   = () => { isDown = false; if (!revealed && scratchedPercent() > 0.30) reveal(); };
 
     canvas.addEventListener("mousedown", down);
     canvas.addEventListener("mousemove", move);
@@ -375,6 +375,10 @@ Volte e use o link gerado na planilha (coluna LINK).`,
     setStatus("pronto para raspar");
     resizeCanvas();
   }
+
+  revealNowBtn.addEventListener("click", () => {
+    if (!revealed) reveal();
+  });
 
   window.addEventListener("resize", () => { if (!revealed) resizeCanvas(); });
   resizeCanvas();
@@ -408,7 +412,7 @@ Volte e use o link gerado na planilha (coluna LINK).`,
         body: JSON.stringify({
           code,
           sig,
-          t, // P/M/G do link
+          t,
           name,
           lastname,
           whatsapp,
@@ -429,7 +433,6 @@ Volte e use o link gerado na planilha (coluna LINK).`,
       setStatus("validado ✅");
       showMsg("Validado e registrado com sucesso.", "ok");
 
-      // Se backend retornar o texto pronto, exibimos com força
       if (data.prize) {
         prizeBox.style.display = "block";
         prizeBox.textContent = data.prize;
