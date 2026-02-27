@@ -63,7 +63,7 @@
       min-height: 220px;
     }
 
-    /* Conteúdo do prêmio fica ATRÁS do verniz (canvas) */
+    /* Conteúdo do prêmio fica ATRÁS do verniz */
     .reveal{
       padding:16px;
       min-height:220px;
@@ -92,6 +92,7 @@
       color: var(--text);
     }
 
+    /* Verniz */
     canvas{
       position:absolute; inset:0;
       width:100%; height:100%;
@@ -183,6 +184,7 @@
       <div id="msg" class="msg"></div>
 
       <div class="scratchWrap" id="scratchWrap" style="display:none;">
+        <!-- Conteúdo já pronto atrás do verniz -->
         <div class="reveal">
           <div class="gift">🎉</div>
           <h2>PARABÉNS! 🎁</h2>
@@ -191,12 +193,11 @@
         </div>
 
         <canvas id="scratch"></canvas>
-        <!-- ✅ agora tem ID para a gente esconder quando necessário -->
         <div class="hint" id="hint"><span>Use o dedo/mouse para raspar</span></div>
       </div>
 
       <form class="form" id="form">
-        <div class="formNote">
+        <div class="formNote" id="formNote">
           <b>Preencha abaixo</b> para registrarmos seu resgate e você recuperar seu prêmio na próxima compra.
         </div>
 
@@ -227,7 +228,8 @@
 
 <script>
 (() => {
-  const ENDPOINT = "https://script.google.com/macros/s/AKfycbynfgPsiirOyZb5LsEQSpUYlnZI18jnTCqgy74rzvRuNtpsn5FTUVT6Pz4mHAScpTUA/exec";
+  // ✅ ENDPOINT NOVO
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbxCqfMgii9uahdePZC5KojAbdb0ULSmebACJ3moDPuPyph7uMuRB-gxKbND7xLgJWi_/exec";
 
   const qs = new URLSearchParams(location.search);
   const code = (qs.get("c") || "").trim();
@@ -245,6 +247,7 @@
   const prizeBox = document.getElementById("prizeBox");
 
   const form = document.getElementById("form");
+  const formNote = document.getElementById("formNote");
   const nameEl = document.getElementById("name");
   const lastnameEl = document.getElementById("lastname");
   const whatsappEl = document.getElementById("whatsapp");
@@ -260,20 +263,7 @@
   }
   function clearMsg(){ msgEl.style.display="none"; msgEl.textContent=""; }
 
-  // sem detalhes internos
-  function prizeFromT(tt){
-    if (tt === "P") return "Você ganhou um Little Frangote's";
-    if (tt === "M") return "Você ganhou um Cluck Frangote's";
-    if (tt === "G") return "Você ganhou um Big Frangote's";
-    return "";
-  }
-
-  rulesEl.textContent =
-`Regras:
-• 1 uso por código.
-• O resgate do prêmio é válido SOMENTE em uma próxima compra.
-• Validade para resgate: 14 dias.
-• Funcionamento: quarta a domingo (o resgate deve ocorrer em dia de funcionamento).`;
+  function safeUpper(s){ return String(s || "").trim().toUpperCase(); }
 
   codePill.textContent = code || "—";
 
@@ -291,22 +281,21 @@ Use o link gerado na planilha (coluna LINK).`,
     return;
   }
 
-  const prizeText = prizeFromT(t);
-  if (!prizeText) {
-    setStatus("link inválido");
-    showMsg("Parâmetro t inválido. Use link gerado na planilha.", "error");
-    return;
+  // Regras: validade vem da CONFIG
+  function renderRules(validadeDias) {
+    const v = Number(validadeDias || 14);
+    rulesEl.textContent =
+`Regras:
+• 1 uso por código.
+• O resgate do prêmio é válido SOMENTE em uma próxima compra.
+• Validade para resgate: ${v} dias.
+• Funcionamento: quarta a domingo (o resgate deve ocorrer em dia de funcionamento).`;
   }
 
-  prizeBox.textContent = prizeText;
-
-  setStatus("pronto para raspar");
-  scratchWrap.style.display = "block";
-
+  // Scratch
   const ctx = canvas.getContext("2d");
   let isDown = false;
   let revealed = false;
-
   let scratchMoves = 0;
   let hintHidden = false;
 
@@ -382,7 +371,7 @@ Use o link gerado na planilha (coluna LINK).`,
     revealed = true;
     setStatus("revelado");
     form.style.display = "flex";
-    hideHint(); // ✅ some definitivamente para não sobrepor o prêmio
+    hideHint();
     clearMsg();
   }
 
@@ -396,10 +385,7 @@ Use o link gerado na planilha (coluna LINK).`,
   function bindCanvas() {
     const down = (ev) => {
       isDown = true;
-
-      // ✅ ao primeiro toque, esconde o hint (ele já cumpriu o papel)
       hideHint();
-
       scratchMoves = Math.min(1000, scratchMoves + 1);
       const p = getXY(ev);
       scratchAt(p.x, p.y);
@@ -436,23 +422,67 @@ Use o link gerado na planilha (coluna LINK).`,
     scratchMoves = 0;
     hintHidden = false;
     hintEl.style.display = "flex";
-
     form.style.display = "none";
     clearMsg();
     setStatus("pronto para raspar");
     resizeCanvas();
   }
 
-  window.addEventListener("resize", () => resizeCanvas());
-  resizeCanvas();
-  bindCanvas();
-
   resetBtn.addEventListener("click", () => resetScratch());
+
+  async function loadConfigAndInit() {
+    setStatus("carregando prêmio...");
+    try {
+      const url = ENDPOINT + "?mode=config&t=" + encodeURIComponent(t);
+      const res = await fetch(url, { method: "GET" });
+      const data = await res.json().catch(() => ({}));
+
+      if (!data || !data.ok) {
+        setStatus("erro");
+        showMsg("Não foi possível carregar o prêmio.\n\nMotivo: " + (data.error || "erro desconhecido"), "error");
+        return;
+      }
+
+      // prizeText vem da CONFIG
+      const prizeText = String(data.prizeText || "").trim();
+      const validadeDias = Number(data.validadeDias || 14);
+      const ativo = !!data.ativo;
+
+      // Preenche o texto atrás do verniz
+      prizeBox.textContent = prizeText ? prizeText : "Prêmio não configurado.";
+
+      renderRules(validadeDias);
+
+      if (!ativo) {
+        // campanha desativada
+        setStatus("indisponível");
+        showMsg("Esta campanha está desativada no momento.", "error");
+        // pode até mostrar a raspadinha, mas bloquear validação
+        sendBtn.disabled = true;
+        formNote.innerHTML = "<b>Campanha indisponível:</b> este prêmio está desativado no momento.";
+      }
+
+      // Inicia raspagem
+      scratchWrap.style.display = "block";
+      setStatus("pronto para raspar");
+      resizeCanvas();
+      bindCanvas();
+      window.addEventListener("resize", () => resizeCanvas());
+
+    } catch (e) {
+      setStatus("erro");
+      showMsg("Falha ao carregar configuração (conexão).", "error");
+    }
+  }
 
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     if (!revealed) {
       showMsg("Primeiro raspe para revelar.", "error");
+      return;
+    }
+    if (sendBtn.disabled) {
+      showMsg("Validação indisponível no momento.", "error");
       return;
     }
 
@@ -472,7 +502,15 @@ Use o link gerado na planilha (coluna LINK).`,
       const res = await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ code, sig, t, name, lastname, whatsapp, ua: navigator.userAgent })
+        body: JSON.stringify({
+          code,
+          sig,
+          t,
+          name,
+          lastname,
+          whatsapp,
+          ua: navigator.userAgent
+        })
       });
 
       const data = await res.json().catch(() => ({}));
@@ -487,6 +525,7 @@ Use o link gerado na planilha (coluna LINK).`,
 
       setStatus("validado ✅");
       showMsg("Validado e registrado com sucesso.", "ok");
+      // trava o botão definitivamente (evita clique duplo)
       sendBtn.disabled = true;
 
     } catch (e) {
@@ -495,6 +534,9 @@ Use o link gerado na planilha (coluna LINK).`,
       sendBtn.disabled = false;
     }
   });
+
+  // Start
+  loadConfigAndInit();
 })();
 </script>
 </body>
